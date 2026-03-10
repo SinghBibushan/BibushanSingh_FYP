@@ -177,7 +177,9 @@ export default async function EventDetailsPage({
                 ))}
               </div>
 
-              <Button className="w-full">Book Tickets</Button>
+              <Button asChild className="w-full">
+                <Link href={`/checkout/${event.slug}`}>Book Tickets</Link>
+              </Button>
             </CardContent>
           </Card>
         </aside>

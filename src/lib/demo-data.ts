@@ -216,3 +216,35 @@ export const demoMetrics = [
   { label: "Verified Students", value: "216", note: "68 pending reviews" },
   { label: "Gold Members", value: "92", note: "High-value returning users" },
 ];
+
+export const demoPromoCodes: Array<{
+  code: string;
+  description: string;
+  discountType: "PERCENTAGE" | "FIXED";
+  discountValue: number;
+  maxDiscountAmount: number;
+  minimumSubtotal: number;
+  applicableSlugs: string[];
+  isActive: boolean;
+}> = [
+  {
+    code: "FEST10",
+    description: "10% off festival and concert experiences.",
+    discountType: "PERCENTAGE" as const,
+    discountValue: 10,
+    maxDiscountAmount: 600,
+    minimumSubtotal: 1000,
+    applicableSlugs: ["kathmandu-night-vibes", "pokhara-adventure-film-fest"],
+    isActive: true,
+  },
+  {
+    code: "NEPAL500",
+    description: "Flat NPR 500 off for higher-value bookings.",
+    discountType: "FIXED" as const,
+    discountValue: 500,
+    maxDiscountAmount: 500,
+    minimumSubtotal: 3000,
+    applicableSlugs: [],
+    isActive: true,
+  },
+];

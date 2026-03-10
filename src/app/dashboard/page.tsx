@@ -6,6 +6,7 @@ const userNavItems = [
   { href: "/dashboard", label: "Overview" },
   { href: "/profile", label: "Profile" },
   { href: "/tickets", label: "Tickets" },
+  { href: "/loyalty", label: "Loyalty" },
 ];
 
 export default async function DashboardPage() {

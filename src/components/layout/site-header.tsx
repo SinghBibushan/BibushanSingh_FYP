@@ -11,6 +11,7 @@ export async function SiteHeader() {
     ...(session
       ? [
           { href: "/tickets", label: "My Tickets" },
+          { href: "/loyalty", label: "Loyalty" },
           { href: "/dashboard", label: "Dashboard" },
         ]
       : []),

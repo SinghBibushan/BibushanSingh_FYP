@@ -21,7 +21,7 @@ export function AppShell({
   badge: string;
   title: string;
   description: string;
-  navItems: ShellNavItem[];
+  navItems: readonly ShellNavItem[];
   currentPath: string;
   children: ReactNode;
 }) {

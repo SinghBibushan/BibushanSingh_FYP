@@ -7,6 +7,7 @@ const userNavItems = [
   { href: "/dashboard", label: "Overview" },
   { href: "/profile", label: "Profile" },
   { href: "/tickets", label: "Tickets" },
+  { href: "/loyalty", label: "Loyalty" },
 ];
 
 export default async function ProfilePage() {
@@ -17,7 +18,7 @@ export default async function ProfilePage() {
     <AppShell
       badge="Profile"
       title="Account profile"
-      description="This profile area now reflects authenticated user data from MongoDB and will later include editing, preferences, and student verification upload."
+      description="This profile area reflects authenticated MongoDB user data and now connects directly to verification and loyalty state."
       navItems={userNavItems}
       currentPath="/profile"
     >
