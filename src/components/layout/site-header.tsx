@@ -1,0 +1,47 @@
+import Link from "next/link";
+
+import { Button } from "@/components/ui/button";
+
+const navItems = [
+  { href: "/events", label: "Events" },
+  { href: "/tickets", label: "My Tickets" },
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/admin", label: "Admin" },
+];
+
+export function SiteHeader() {
+  return (
+    <header className="sticky top-0 z-40 border-b border-border/70 bg-background/90 backdrop-blur">
+      <div className="container-shell flex h-20 items-center justify-between gap-6">
+        <Link href="/" className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary text-sm font-bold text-secondary-foreground">
+            EE
+          </div>
+          <div>
+            <p className="font-heading text-2xl leading-none">EventEase</p>
+            <p className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
+              Nepal Event Platform
+            </p>
+          </div>
+        </Link>
+
+        <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
+          {navItems.map((item) => (
+            <Link key={item.href} href={item.href} className="transition hover:text-foreground">
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-3">
+          <Button asChild variant="ghost" className="hidden sm:inline-flex">
+            <Link href="/login">Log in</Link>
+          </Button>
+          <Button asChild>
+            <Link href="/register">Get Started</Link>
+          </Button>
+        </div>
+      </div>
+    </header>
+  );
+}

@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+:root {
+  --font-body: "Aptos", "Segoe UI", sans-serif;
+  --font-heading: "Iowan Old Style", "Palatino Linotype", serif;
+  --background: #f8f4ec;
+  --foreground: #14213d;
+  --card: #fffdf8;
+  --card-foreground: #14213d;
+  --muted: #efe5d5;
+  --muted-foreground: #6b7280;
+  --primary: #d97706;
+  --primary-foreground: #fffdf8;
+  --secondary: #1f4e5f;
+  --secondary-foreground: #f8f4ec;
+  --accent: #f59e0b;
+  --border: rgba(20, 33, 61, 0.12);
+  --ring: rgba(217, 119, 6, 0.32);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-body);
+  --font-heading: var(--font-heading);
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(245, 158, 11, 0.18), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(31, 78, 95, 0.14), transparent 25%),
+    var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body), sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading), serif;
+}
+
+::selection {
+  background: rgba(217, 119, 6, 0.2);
+}
+
+.container-shell {
+  margin-inline: auto;
+  width: min(1160px, calc(100% - 2rem));
+}
+
+.surface-grid {
+  background-image:
+    linear-gradient(rgba(20, 33, 61, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20, 33, 61, 0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.hero-orb {
+  position: absolute;
+  inset: auto auto 0 0;
+  height: 20rem;
+  width: 20rem;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.34), transparent 65%);
+  filter: blur(24px);
+}
