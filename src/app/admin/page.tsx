@@ -1,7 +1,12 @@
-import { SiteHeader } from "@/components/layout/site-header";
-import { Badge } from "@/components/ui/badge";
+import { AppShell } from "@/components/layout/app-shell";
 import { Card, CardContent } from "@/components/ui/card";
+import { requireAdmin } from "@/lib/auth";
 import { demoMetrics } from "@/lib/demo-data";
+
+const adminNavItems = [
+  { href: "/admin", label: "Overview" },
+  { href: "/events", label: "Public events" },
+];
 
 const adminModules = [
   "Events and ticket pricing",
@@ -10,20 +15,18 @@ const adminModules = [
   "Users and booking records",
 ];
 
-export default function AdminPage() {
-  return (
-    <div className="pb-16">
-      <SiteHeader />
-      <main className="container-shell space-y-8 py-14">
-        <div className="space-y-3">
-          <Badge>Admin dashboard</Badge>
-          <h1 className="text-5xl leading-none">Operations control center</h1>
-          <p className="max-w-3xl text-base leading-7 text-muted-foreground">
-            This admin surface is now scaffolded and ready for role-protected CRUD,
-            metrics, reports, and moderation flows in the next implementation phases.
-          </p>
-        </div>
+export default async function AdminPage() {
+  const session = await requireAdmin();
 
+  return (
+    <AppShell
+      badge="Admin dashboard"
+      title={`Operations control center`}
+      description={`Signed in as ${session.name}. This route is now protected by role checks and will host admin CRUD, reports, and moderation flows in the next phases.`}
+      navItems={adminNavItems}
+      currentPath="/admin"
+    >
+      <div className="space-y-5">
         <div className="grid gap-5 md:grid-cols-4">
           {demoMetrics.map((metric) => (
             <Card key={metric.label}>
@@ -50,7 +53,7 @@ export default function AdminPage() {
             </div>
           </CardContent>
         </Card>
-      </main>
-    </div>
+      </div>
+    </AppShell>
   );
 }

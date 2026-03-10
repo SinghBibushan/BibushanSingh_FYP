@@ -1,52 +1,56 @@
-import { SiteHeader } from "@/components/layout/site-header";
-import { Badge } from "@/components/ui/badge";
+import { AppShell } from "@/components/layout/app-shell";
 import { Card, CardContent } from "@/components/ui/card";
+import { getCurrentUser, requireUser } from "@/lib/auth";
 
-const cards = [
-  {
-    title: "Loyalty tier",
-    value: "Bronze",
-    note: "Silver and Gold thresholds will update automatically from booking history.",
-  },
-  {
-    title: "Points balance",
-    value: "480",
-    note: "Redeemable during checkout with a capped maximum discount.",
-  },
-  {
-    title: "Upcoming tickets",
-    value: "3",
-    note: "QR and PDF delivery will surface in the tickets phase.",
-  },
+const userNavItems = [
+  { href: "/dashboard", label: "Overview" },
+  { href: "/profile", label: "Profile" },
+  { href: "/tickets", label: "Tickets" },
 ];
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  await requireUser();
+  const user = await getCurrentUser();
+
+  const cards = [
+    {
+      title: "Loyalty tier",
+      value: user?.loyaltyTier ?? "Bronze",
+      note: "Tier upgrades will come from confirmed booking totals.",
+    },
+    {
+      title: "Points balance",
+      value: String(user?.loyaltyPoints ?? 0),
+      note: "Redeemable during checkout with a capped percentage rule.",
+    },
+    {
+      title: "Account status",
+      value: user?.emailVerifiedAt ? "Verified" : "Pending",
+      note: "Email verification status is now tracked through the auth flow.",
+    },
+  ];
+
   return (
-    <div className="pb-16">
-      <SiteHeader />
-      <main className="container-shell space-y-8 py-14">
-        <div className="space-y-3">
-          <Badge>User workspace</Badge>
-          <h1 className="text-5xl leading-none">Customer dashboard scaffold</h1>
-          <p className="max-w-2xl text-base leading-7 text-muted-foreground">
-            This area will hold profile controls, notification preferences,
-            verification status, loyalty analytics, and booking shortcuts.
-          </p>
-        </div>
-        <div className="grid gap-5 md:grid-cols-3">
-          {cards.map((card) => (
-            <Card key={card.title}>
-              <CardContent className="space-y-4 p-6">
-                <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
-                  {card.title}
-                </p>
-                <p className="text-4xl leading-none">{card.value}</p>
-                <p className="text-sm leading-7 text-muted-foreground">{card.note}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </main>
-    </div>
+    <AppShell
+      badge="User workspace"
+      title={`Welcome back, ${user?.name?.split(" ")[0] ?? "Guest"}`}
+      description="This dashboard is now protected by real session auth and acts as the entry point for bookings, tickets, loyalty, and profile management."
+      navItems={userNavItems}
+      currentPath="/dashboard"
+    >
+      <div className="grid gap-5 md:grid-cols-3">
+        {cards.map((card) => (
+          <Card key={card.title}>
+            <CardContent className="space-y-4 p-6">
+              <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
+                {card.title}
+              </p>
+              <p className="text-4xl leading-none">{card.value}</p>
+              <p className="text-sm leading-7 text-muted-foreground">{card.note}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </AppShell>
   );
 }

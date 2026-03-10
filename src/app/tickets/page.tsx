@@ -1,8 +1,14 @@
 import { QrCode, ReceiptText } from "lucide-react";
 
-import { SiteHeader } from "@/components/layout/site-header";
-import { Badge } from "@/components/ui/badge";
+import { AppShell } from "@/components/layout/app-shell";
 import { Card, CardContent } from "@/components/ui/card";
+import { requireUser } from "@/lib/auth";
+
+const userNavItems = [
+  { href: "/dashboard", label: "Overview" },
+  { href: "/profile", label: "Profile" },
+  { href: "/tickets", label: "Tickets" },
+];
 
 const ticketStates = [
   {
@@ -12,42 +18,39 @@ const ticketStates = [
   },
   {
     title: "PDF downloads",
-    description: "Users will be able to download printable ticket PDFs after payment confirmation.",
+    description: "Confirmed bookings will expose downloadable PDF tickets here.",
     icon: ReceiptText,
   },
 ];
 
-export default function TicketsPage() {
+export default async function TicketsPage() {
+  await requireUser();
+
   return (
-    <div className="pb-16">
-      <SiteHeader />
-      <main className="container-shell space-y-8 py-14">
-        <div className="space-y-3">
-          <Badge>My tickets</Badge>
-          <h1 className="text-5xl leading-none">Ticket vault scaffold</h1>
-          <p className="max-w-2xl text-base leading-7 text-muted-foreground">
-            The ticket issuance, QR, and PDF workflow will be connected after mock
-            payment and booking confirmation are implemented.
-          </p>
-        </div>
-        <div className="grid gap-5 md:grid-cols-2">
-          {ticketStates.map((item) => (
-            <Card key={item.title}>
-              <CardContent className="space-y-4 p-6">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-muted">
-                  <item.icon className="h-6 w-6 text-primary" />
-                </div>
-                <div className="space-y-2">
-                  <h2 className="text-3xl leading-none">{item.title}</h2>
-                  <p className="text-sm leading-7 text-muted-foreground">
-                    {item.description}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </main>
-    </div>
+    <AppShell
+      badge="My tickets"
+      title="Ticket vault"
+      description="This area is now protected behind login and will become the home for issued QR tickets and downloadable PDFs after the booking flow is built."
+      navItems={userNavItems}
+      currentPath="/tickets"
+    >
+      <div className="grid gap-5 md:grid-cols-2">
+        {ticketStates.map((item) => (
+          <Card key={item.title}>
+            <CardContent className="space-y-4 p-6">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-muted">
+                <item.icon className="h-6 w-6 text-primary" />
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-3xl leading-none">{item.title}</h2>
+                <p className="text-sm leading-7 text-muted-foreground">
+                  {item.description}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </AppShell>
   );
 }
