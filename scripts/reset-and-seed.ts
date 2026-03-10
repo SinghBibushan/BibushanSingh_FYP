@@ -1,10 +1,27 @@
+import {
+  connectScriptDatabase,
+  disconnectScriptDatabase,
+  resetDatabase,
+  seedDatabase,
+} from "./seed-lib";
+
 async function main() {
-  console.log("Reset and reseed scaffolded. Full database reset logic will be added in a later phase.");
+  await connectScriptDatabase();
+  await resetDatabase();
+  const credentials = await seedDatabase();
+
+  console.log("Database reset and reseeded successfully.");
+  console.log(`Demo admin: ${credentials.adminEmail} / ${credentials.adminPassword}`);
+  console.log(`Demo user: ${credentials.userEmail} / ${credentials.userPassword}`);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+main()
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await disconnectScriptDatabase();
+  });
 
 export {};
