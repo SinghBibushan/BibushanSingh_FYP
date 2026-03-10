@@ -1,60 +1,74 @@
-import Link from "next/link";
-
 import { SiteHeader } from "@/components/layout/site-header";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { demoEvents } from "@/lib/demo-data";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { EventCard } from "@/components/events/event-card";
+import { EventEmptyState } from "@/components/events/event-empty-state";
+import { EventFilters } from "@/components/events/event-filters";
+import {
+  getEventFilterOptions,
+  getPublicEvents,
+} from "@/server/events/service";
 
-export default function EventsPage() {
+export default async function EventsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    q?: string;
+    category?: string;
+    city?: string;
+    featured?: string;
+  }>;
+}) {
+  const params = await searchParams;
+  const filterOptions = getEventFilterOptions();
+  const events = await getPublicEvents({
+    q: params.q,
+    category: params.category,
+    city: params.city,
+    featured: params.featured === "true",
+  });
+
   return (
     <div className="pb-16">
       <SiteHeader />
       <main className="container-shell space-y-10 py-14">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
             <Badge>Event discovery</Badge>
             <h1 className="text-5xl leading-none">Upcoming events across Nepal</h1>
-            <p className="max-w-2xl text-base leading-7 text-muted-foreground">
-              This scaffold already exposes the public event browsing surface.
-              Search, filtering, and live DB-backed listings will land in the next
-              build phases on top of this structure.
+            <p className="max-w-3xl text-base leading-8 text-muted-foreground">
+              Browse polished public listings with keyword search, category and city
+              filters, featured highlights, and DB fallback support when demo data
+              needs to carry the viva.
             </p>
+          </div>
+          <div className="rounded-[28px] bg-muted px-6 py-4">
+            <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+              Results
+            </p>
+            <p className="mt-2 text-3xl leading-none">{events.length}</p>
           </div>
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-3">
-          {demoEvents.map((event) => (
-            <Card key={event.slug}>
-              <CardContent className="space-y-4 p-6">
-                <Badge>{event.category}</Badge>
-                <div className="space-y-2">
-                  <h2 className="text-3xl leading-none">{event.title}</h2>
-                  <p className="text-sm leading-7 text-muted-foreground">
-                    {event.summary}
-                  </p>
-                </div>
-                <div className="space-y-2 text-sm text-muted-foreground">
-                  <p>{formatDate(event.startsAt)}</p>
-                  <p>
-                    {event.venueName}, {event.city}
-                  </p>
-                </div>
-                <div className="flex items-center justify-between">
-                  <p className="font-semibold text-foreground">
-                    From {formatCurrency(event.priceFrom)}
-                  </p>
-                  <Link
-                    href={`/events/${event.slug}`}
-                    className="text-sm font-semibold text-secondary"
-                  >
-                    Open event
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <EventFilters
+          categories={filterOptions.categories}
+          cities={filterOptions.cities}
+          values={{
+            q: params.q ?? "",
+            category: params.category ?? "all",
+            city: params.city ?? "all",
+            featured: params.featured ?? "all",
+          }}
+        />
+
+        {events.length === 0 ? (
+          <EventEmptyState />
+        ) : (
+          <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
+            {events.map((event) => (
+              <EventCard key={event.slug} event={event} />
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
