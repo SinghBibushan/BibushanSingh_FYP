@@ -7,6 +7,7 @@ import {
   getEventFilterOptions,
   getPublicEvents,
 } from "@/server/events/service";
+import { Sparkles } from "lucide-react";
 
 export default async function EventsPage({
   searchParams,
@@ -33,21 +34,20 @@ export default async function EventsPage({
       <main className="container-shell space-y-10 py-14">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between opacity-0 animate-fade-in">
           <div className="space-y-3">
-            <Badge className="bg-gradient-to-r from-primary to-accent text-white border-0">
-              Event discovery
+            <Badge className="bg-gradient-to-r from-primary via-secondary to-accent text-white border-0">
+              <Sparkles className="h-3 w-3 mr-1" />
+              Discover Events
             </Badge>
-            <h1 className="text-5xl leading-none">
-              Upcoming events across <span className="gradient-text">Nepal</span>
+            <h1 className="text-5xl leading-none font-bold">
+              Upcoming <span className="gradient-text">Events</span> Across Nepal
             </h1>
             <p className="max-w-3xl text-base leading-8 text-muted-foreground">
-              Browse polished public listings with keyword search, category and city
-              filters, featured highlights, and DB fallback support when demo data
-              needs to carry the viva.
+              From electrifying concerts to cultural festivals, find and book tickets for the most exciting events happening near you.
             </p>
           </div>
-          <div className="rounded-[28px] bg-gradient-to-br from-primary/10 to-accent/10 px-6 py-4 border border-primary/20 hover-lift">
+          <div className="rounded-[28px] bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 px-6 py-4 border border-primary/30 hover-lift backdrop-blur-sm">
             <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
-              Results
+              Available Events
             </p>
             <p className="mt-2 text-3xl leading-none font-bold gradient-text">{events.length}</p>
           </div>

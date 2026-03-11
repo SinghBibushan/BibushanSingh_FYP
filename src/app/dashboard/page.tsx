@@ -1,7 +1,7 @@
 import { AppShell } from "@/components/layout/app-shell";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentUser, requireUser } from "@/lib/auth";
-import { Award, CheckCircle, TrendingUp } from "lucide-react";
+import { Award, CheckCircle, TrendingUp, Sparkles } from "lucide-react";
 
 const userNavItems = [
   { href: "/dashboard", label: "Overview" },
@@ -18,31 +18,37 @@ export default async function DashboardPage() {
     {
       title: "Loyalty tier",
       value: user?.loyaltyTier ?? "Bronze",
-      note: "Tier upgrades will come from confirmed booking totals.",
+      note: "Upgrade your tier by booking more events",
       icon: Award,
-      gradient: "from-amber-500/10 to-orange-500/10",
+      gradient: "from-amber-500/20 to-orange-500/20",
+      iconColor: "text-amber-400",
+      borderColor: "border-amber-500/30",
     },
     {
       title: "Points balance",
       value: String(user?.loyaltyPoints ?? 0),
-      note: "Redeemable during checkout with a capped percentage rule.",
+      note: "Redeem points on your next booking",
       icon: TrendingUp,
-      gradient: "from-primary/10 to-accent/10",
+      gradient: "from-primary/20 to-secondary/20",
+      iconColor: "text-primary",
+      borderColor: "border-primary/30",
     },
     {
       title: "Account status",
       value: user?.emailVerifiedAt ? "Verified" : "Pending",
-      note: "Email verification status is now tracked through the auth flow.",
+      note: "Your account is secure and ready",
       icon: CheckCircle,
-      gradient: "from-secondary/10 to-primary/10",
+      gradient: "from-green-500/20 to-emerald-500/20",
+      iconColor: "text-green-400",
+      borderColor: "border-green-500/30",
     },
   ];
 
   return (
     <AppShell
-      badge="User workspace"
-      title={`Welcome back, ${user?.name?.split(" ")[0] ?? "Guest"}`}
-      description="This dashboard is now protected by real session auth and acts as the entry point for bookings, tickets, loyalty, and profile management."
+      badge="User Dashboard"
+      title={`Welcome back, ${user?.name?.split(" ")[0] ?? "Guest"} ✨`}
+      description="Manage your bookings, track loyalty rewards, and discover new events tailored just for you."
       navItems={userNavItems}
       currentPath="/dashboard"
     >
@@ -52,19 +58,21 @@ export default async function DashboardPage() {
           return (
             <Card
               key={card.title}
-              className="hover-lift opacity-0 animate-scale-in"
+              className={`hover-lift opacity-0 animate-scale-in border-2 ${card.borderColor}`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <CardContent className={`space-y-4 p-6 bg-gradient-to-br ${card.gradient} relative overflow-hidden`}>
-                <div className="absolute top-0 right-0 opacity-10">
-                  <Icon className="h-32 w-32 text-primary" />
+                <div className="absolute top-0 right-0 opacity-5">
+                  <Icon className="h-32 w-32" />
                 </div>
                 <div className="relative z-10">
                   <div className="flex items-center justify-between">
                     <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
                       {card.title}
                     </p>
-                    <Icon className="h-5 w-5 text-primary" />
+                    <div className={`p-2 rounded-lg bg-background/50 border ${card.borderColor}`}>
+                      <Icon className={`h-5 w-5 ${card.iconColor}`} />
+                    </div>
                   </div>
                   <p className="text-4xl leading-none font-bold gradient-text mt-3">{card.value}</p>
                   <p className="text-sm leading-7 text-muted-foreground mt-3">{card.note}</p>

@@ -13,10 +13,24 @@ const iconMap: Record<string, any> = {
 };
 
 const gradientMap: Record<string, string> = {
-  "Total events": "from-blue-500/10 to-cyan-500/10",
-  "Total users": "from-purple-500/10 to-pink-500/10",
-  "Total bookings": "from-green-500/10 to-emerald-500/10",
-  "Revenue": "from-amber-500/10 to-orange-500/10",
+  "Total events": "from-blue-500/20 to-cyan-500/20",
+  "Total users": "from-purple-500/20 to-pink-500/20",
+  "Total bookings": "from-green-500/20 to-emerald-500/20",
+  "Revenue": "from-amber-500/20 to-orange-500/20",
+};
+
+const borderMap: Record<string, string> = {
+  "Total events": "border-blue-500/30",
+  "Total users": "border-purple-500/30",
+  "Total bookings": "border-green-500/30",
+  "Revenue": "border-amber-500/30",
+};
+
+const iconColorMap: Record<string, string> = {
+  "Total events": "text-blue-400",
+  "Total users": "text-purple-400",
+  "Total bookings": "text-green-400",
+  "Revenue": "text-amber-400",
 };
 
 export default async function AdminPage() {
@@ -25,33 +39,37 @@ export default async function AdminPage() {
 
   return (
     <AppShell
-      badge="Admin dashboard"
-      title="Operations control center"
-      description={`Signed in as ${session.name}. Metrics and management modules are now wired into the real admin layer.`}
+      badge="Admin Control Center"
+      title="Operations Dashboard 🚀"
+      description={`Signed in as ${session.name}. Monitor metrics, manage events, and control your platform.`}
       navItems={adminNavItems}
       currentPath="/admin"
     >
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
         {overview.metrics.map((metric, index) => {
           const Icon = iconMap[metric.label] || Calendar;
-          const gradient = gradientMap[metric.label] || "from-primary/10 to-accent/10";
+          const gradient = gradientMap[metric.label] || "from-primary/20 to-accent/20";
+          const border = borderMap[metric.label] || "border-primary/30";
+          const iconColor = iconColorMap[metric.label] || "text-primary";
 
           return (
             <Card
               key={metric.label}
-              className="hover-lift opacity-0 animate-scale-in"
+              className={`hover-lift opacity-0 animate-scale-in border-2 ${border}`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <CardContent className={`space-y-3 p-6 bg-gradient-to-br ${gradient} relative overflow-hidden`}>
-                <div className="absolute top-0 right-0 opacity-10">
-                  <Icon className="h-24 w-24 text-primary" />
+                <div className="absolute top-0 right-0 opacity-5">
+                  <Icon className="h-24 w-24" />
                 </div>
                 <div className="relative z-10">
                   <div className="flex items-center justify-between">
                     <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
                       {metric.label}
                     </p>
-                    <Icon className="h-5 w-5 text-primary" />
+                    <div className={`p-2 rounded-lg bg-background/50 border ${border}`}>
+                      <Icon className={`h-5 w-5 ${iconColor}`} />
+                    </div>
                   </div>
                   <p className="text-3xl leading-none font-bold gradient-text mt-3">{metric.value}</p>
                   <p className="text-sm leading-7 text-muted-foreground mt-3">{metric.note}</p>
