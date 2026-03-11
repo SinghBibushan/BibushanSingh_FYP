@@ -16,12 +16,16 @@ export default async function LoginPage() {
     <div className="pb-16">
       <SiteHeader />
       <main className="container-shell grid min-h-[calc(100vh-5rem)] items-center gap-8 py-14 lg:grid-cols-[0.95fr_1.05fr]">
-        <AuthPanel
-          eyebrow="Authentication"
-          title="Secure login for customers and administrators."
-          description="This phase adds working JWT cookie auth, reset links, and email verification while keeping the setup demo-friendly on a fresh viva machine."
-        />
-        <LoginForm />
+        <div className="opacity-0 animate-slide-in-left">
+          <AuthPanel
+            eyebrow="Authentication"
+            title="Secure login for customers and administrators."
+            description="This phase adds working JWT cookie auth, reset links, and email verification while keeping the setup demo-friendly on a fresh viva machine."
+          />
+        </div>
+        <div className="opacity-0 animate-slide-in-right delay-200">
+          <LoginForm />
+        </div>
       </main>
     </div>
   );

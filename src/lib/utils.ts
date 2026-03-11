@@ -14,10 +14,13 @@ export function formatCurrency(amount: number, currency = "NPR") {
 }
 
 export function formatDate(date: Date | string) {
+  if (!date) return "N/A";
+  const parsedDate = new Date(date);
+  if (isNaN(parsedDate.getTime())) return "Invalid date";
   return new Intl.DateTimeFormat("en-NP", {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(new Date(date));
+  }).format(parsedDate);
 }
 
 export function slugify(value: string) {
