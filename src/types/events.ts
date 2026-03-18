@@ -12,6 +12,7 @@ export type EventTicketView = {
 
 export type EventListItem = {
   id: string;
+  _id: string;
   title: string;
   slug: string;
   summary: string;

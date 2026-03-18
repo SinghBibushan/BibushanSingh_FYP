@@ -20,6 +20,7 @@ import { PromoCode } from "@/models/PromoCode";
 import { StudentVerification } from "@/models/StudentVerification";
 import { TicketType } from "@/models/TicketType";
 import { User } from "@/models/User";
+import { logNotification, createInAppNotification } from "@/server/notifications/service";
 
 async function requireAdminApiSession() {
   const session = await getSession();
@@ -207,6 +208,24 @@ export async function createAdminEvent(input: AdminEventInput) {
     entityId: String(event._id),
     after: event.toObject(),
   });
+
+  // Notify all users about new event
+  const users = await User.find({}).lean();
+  const notificationPromises = users.map(async (user) => {
+    await createInAppNotification({
+      userId: String(user._id),
+      type: "NEW_EVENT",
+      title: "New Event Available!",
+      message: `Check out the new event: ${event.title} on ${new Date(event.startsAt).toLocaleDateString()}`,
+      link: `/events/${event.slug}`,
+      metadata: {
+        eventId: String(event._id),
+        eventTitle: event.title,
+      },
+    });
+  });
+
+  await Promise.all(notificationPromises);
 
   return { message: "Event created successfully.", id: String(event._id) };
 }
@@ -400,7 +419,7 @@ export async function reviewStudentVerification(id: string, input: StudentReview
   verification.reviewedAt = new Date();
   await verification.save();
 
-  await User.findByIdAndUpdate(verification.userId, {
+  const user = await User.findByIdAndUpdate(verification.userId, {
     studentVerificationStatus: data.status,
   });
 
@@ -411,6 +430,39 @@ export async function reviewStudentVerification(id: string, input: StudentReview
     entityId: id,
     after: verification.toObject(),
   });
+
+  // Send notification to user
+  if (user) {
+    const statusText = data.status === "APPROVED" ? "approved" : "rejected";
+    const message = data.status === "APPROVED"
+      ? "Your student verification has been approved! You can now use student discounts when booking tickets."
+      : `Your student verification has been rejected. ${data.notes || "Please contact support for more information."}`;
+
+    await logNotification({
+      userId: String(user._id),
+      email: user.email,
+      channel: "EMAIL",
+      type: "STUDENT_VERIFIED",
+      subject: `Student Verification ${statusText.charAt(0).toUpperCase() + statusText.slice(1)}`,
+      message,
+      payload: {
+        status: data.status,
+        notes: data.notes,
+      },
+    });
+
+    // Create in-app notification
+    await createInAppNotification({
+      userId: String(user._id),
+      type: "STUDENT_VERIFIED",
+      title: `Student Verification ${statusText.charAt(0).toUpperCase() + statusText.slice(1)}`,
+      message,
+      link: "/profile",
+      metadata: {
+        status: data.status,
+      },
+    });
+  }
 
   return { message: "Verification updated successfully." };
 }

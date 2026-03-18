@@ -19,7 +19,9 @@ const userSchema = new Schema(
   {
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, index: true, lowercase: true, trim: true },
-    passwordHash: { type: String, required: true },
+    passwordHash: { type: String, default: "" },
+    googleId: { type: String, sparse: true },
+    authProvider: { type: String, enum: ["LOCAL", "GOOGLE"], default: "LOCAL" },
     role: { type: String, enum: USER_ROLES, default: "USER", index: true },
     phone: { type: String, default: "" },
     avatarUrl: { type: String, default: "" },
@@ -37,6 +39,9 @@ const userSchema = new Schema(
   },
   { timestamps: true },
 );
+
+// Create unique index for googleId only when it exists
+userSchema.index({ googleId: 1 }, { unique: true, sparse: true });
 
 export type UserDocument = InferSchemaType<typeof userSchema>;
 export const User = models.User || model("User", userSchema);

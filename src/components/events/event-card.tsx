@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { EventListItem } from "@/types/events";
+import { WishlistButton } from "./wishlist-button";
 
 const gradientMap: Record<string, string> = {
   "Music": "from-purple-600 via-pink-600 to-purple-600",
@@ -31,12 +32,15 @@ export function EventCard({ event }: { event: EventListItem }) {
             <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30 transition-colors">
               {event.category}
             </Badge>
-            {event.featured ? (
-              <span className="rounded-full bg-white/20 backdrop-blur-sm px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] border border-white/30 flex items-center gap-1">
-                <TrendingUp className="h-3 w-3" />
-                Hot
-              </span>
-            ) : null}
+            <div className="flex items-center gap-2">
+              {event.featured ? (
+                <span className="rounded-full bg-white/20 backdrop-blur-sm px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] border border-white/30 flex items-center gap-1">
+                  <TrendingUp className="h-3 w-3" />
+                  Hot
+                </span>
+              ) : null}
+              <WishlistButton eventId={event._id} size="sm" />
+            </div>
           </div>
           <h2 className="mt-8 text-3xl leading-none group-hover:scale-105 transition-transform duration-300 origin-left font-bold">
             {event.title}

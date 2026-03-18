@@ -24,7 +24,11 @@ const eventSchema = new Schema(
     settings: {
       featured: { type: Boolean, default: false },
       highlighted: { type: Boolean, default: false },
+      isOutdoor: { type: Boolean, default: false },
+      seatSelectionEnabled: { type: Boolean, default: false },
     },
+    averageRating: { type: Number, default: 0, min: 0, max: 5 },
+    totalReviews: { type: Number, default: 0, min: 0 },
   },
   { timestamps: true },
 );

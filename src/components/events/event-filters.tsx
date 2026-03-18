@@ -43,7 +43,7 @@ export function EventFilters({
               id="category"
               name="category"
               defaultValue={values.category}
-              className="flex h-12 w-full rounded-2xl border border-border bg-white px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex h-12 w-full rounded-2xl border border-border bg-background px-4 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
             >
               <option value="all">All categories</option>
               {categories.map((category) => (
@@ -60,7 +60,7 @@ export function EventFilters({
               id="city"
               name="city"
               defaultValue={values.city}
-              className="flex h-12 w-full rounded-2xl border border-border bg-white px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex h-12 w-full rounded-2xl border border-border bg-background px-4 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
             >
               <option value="all">All cities</option>
               {cities.map((city) => (
@@ -77,7 +77,7 @@ export function EventFilters({
               id="featured"
               name="featured"
               defaultValue={values.featured}
-              className="flex h-12 w-full rounded-2xl border border-border bg-white px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex h-12 w-full rounded-2xl border border-border bg-background px-4 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
             >
               <option value="all">All events</option>
               <option value="true">Featured only</option>

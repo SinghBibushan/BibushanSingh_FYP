@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { NextRequest } from "next/server";
 import jwt, { type SignOptions } from "jsonwebtoken";
 
 import { SESSION_COOKIE_NAME } from "@/lib/constants";
@@ -9,6 +10,7 @@ import { User } from "@/models/User";
 
 export type SessionPayload = {
   sub: string;
+  _id?: string;
   email: string;
   role: "USER" | "ADMIN";
   name: string;
@@ -101,4 +103,22 @@ export async function requireAdmin() {
   }
 
   return session;
+}
+
+// Verify auth from request (for API routes)
+export async function verifyAuth(req: NextRequest) {
+  const token = req.cookies.get(SESSION_COOKIE_NAME)?.value;
+
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const payload = jwt.verify(token, env.JWT_SECRET) as SessionPayload;
+    await connectToDatabase();
+    const user = await User.findById(payload.sub).lean();
+    return user;
+  } catch {
+    return null;
+  }
 }

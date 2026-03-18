@@ -1,10 +1,9 @@
 import { AppShell } from "@/components/layout/app-shell";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { adminNavItems } from "@/lib/admin-nav";
 import { requireAdmin } from "@/lib/auth";
-import { formatDate } from "@/lib/utils";
 import { listAdminUsers } from "@/server/admin/service";
+import { UserManagementTable } from "./user-management-table";
 
 export default async function AdminUsersPage() {
   await requireAdmin();
@@ -14,7 +13,7 @@ export default async function AdminUsersPage() {
     <AppShell
       badge="Admin users"
       title="User management"
-      description="Basic user administration with roles, loyalty state, and verification visibility."
+      description="Manage user accounts, roles, and permissions. Promote users to admin or remove accounts."
       navItems={adminNavItems}
       currentPath="/admin/users"
     >
@@ -26,31 +25,7 @@ export default async function AdminUsersPage() {
               No users available yet.
             </div>
           ) : (
-            <div className="space-y-3">
-              {users.map((user) => (
-                <div
-                  key={user.id}
-                  className="grid gap-3 rounded-2xl bg-muted p-4 md:grid-cols-[1fr_0.6fr_0.7fr_0.7fr_0.8fr]"
-                >
-                  <div>
-                    <p className="font-semibold">{user.name}</p>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
-                  </div>
-                  <div>
-                    <Badge>{user.role}</Badge>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {user.loyaltyTier} / {user.loyaltyPoints} pts
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {user.studentVerificationStatus}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {formatDate(user.createdAt)}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <UserManagementTable initialUsers={users} />
           )}
         </CardContent>
       </Card>

@@ -62,20 +62,20 @@ export default async function DashboardPage() {
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <CardContent className={`space-y-4 p-6 bg-gradient-to-br ${card.gradient} relative overflow-hidden`}>
-                <div className="absolute top-0 right-0 opacity-5">
+                <div className="absolute -right-4 -top-4 opacity-5">
                   <Icon className="h-32 w-32" />
                 </div>
                 <div className="relative z-10">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-xs uppercase tracking-[0.24em] font-semibold text-muted-foreground">
                       {card.title}
                     </p>
-                    <div className={`p-2 rounded-lg bg-background/50 border ${card.borderColor}`}>
+                    <div className={`p-2.5 rounded-xl bg-background/60 border-2 ${card.borderColor} shadow-sm`}>
                       <Icon className={`h-5 w-5 ${card.iconColor}`} />
                     </div>
                   </div>
-                  <p className="text-4xl leading-none font-bold gradient-text mt-3">{card.value}</p>
-                  <p className="text-sm leading-7 text-muted-foreground mt-3">{card.note}</p>
+                  <p className="text-4xl leading-none font-bold gradient-text mb-3">{card.value}</p>
+                  <p className="text-sm leading-6 text-muted-foreground">{card.note}</p>
                 </div>
               </CardContent>
             </Card>

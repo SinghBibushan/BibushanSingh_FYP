@@ -59,20 +59,20 @@ export default async function AdminPage() {
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <CardContent className={`space-y-3 p-6 bg-gradient-to-br ${gradient} relative overflow-hidden`}>
-                <div className="absolute top-0 right-0 opacity-5">
+                <div className="absolute -right-3 -top-3 opacity-5">
                   <Icon className="h-24 w-24" />
                 </div>
                 <div className="relative z-10">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-xs uppercase tracking-[0.24em] font-semibold text-muted-foreground">
                       {metric.label}
                     </p>
-                    <div className={`p-2 rounded-lg bg-background/50 border ${border}`}>
+                    <div className={`p-2.5 rounded-xl bg-background/60 border-2 ${border} shadow-sm`}>
                       <Icon className={`h-5 w-5 ${iconColor}`} />
                     </div>
                   </div>
-                  <p className="text-3xl leading-none font-bold gradient-text mt-3">{metric.value}</p>
-                  <p className="text-sm leading-7 text-muted-foreground mt-3">{metric.note}</p>
+                  <p className="text-3xl leading-none font-bold gradient-text mb-3">{metric.value}</p>
+                  <p className="text-sm leading-6 text-muted-foreground">{metric.note}</p>
                 </div>
               </CardContent>
             </Card>

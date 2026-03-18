@@ -7,8 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { EventReviews } from "@/components/reviews/event-reviews";
+import { EventGallery } from "@/components/gallery/event-gallery";
+import { WeatherWidget } from "@/components/weather/weather-widget";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { getPublicEventBySlug } from "@/server/events/service";
+import { getSession } from "@/lib/auth";
 
 export default async function EventDetailsPage({
   params,
@@ -17,6 +21,7 @@ export default async function EventDetailsPage({
 }) {
   const { slug } = await params;
   const event = await getPublicEventBySlug(slug);
+  const session = await getSession();
 
   if (!event) {
     notFound();
@@ -100,6 +105,34 @@ export default async function EventDetailsPage({
             </CardContent>
           </Card>
 
+          {/* Weather Widget for Outdoor Events */}
+          {event.category === "Outdoor" && (
+            <Card>
+              <CardContent className="p-6">
+                <WeatherWidget
+                  city={event.city}
+                  date={new Date(event.startsAt).toISOString()}
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Event Gallery */}
+          <Card>
+            <CardContent className="space-y-4 p-6">
+              <h2 className="text-3xl leading-none">Event Gallery</h2>
+              <EventGallery eventId={event.id} />
+            </CardContent>
+          </Card>
+
+          {/* Reviews Section */}
+          <Card>
+            <CardContent className="space-y-4 p-6">
+              <h2 className="text-3xl leading-none">Reviews & Ratings</h2>
+              <EventReviews eventId={event.id} />
+            </CardContent>
+          </Card>
+
           <Card>
             <CardContent className="space-y-5 p-6">
               <div className="flex items-center justify-between">
@@ -139,8 +172,7 @@ export default async function EventDetailsPage({
                   {formatCurrency(event.priceFrom)}
                 </p>
                 <p className="mt-2 text-sm leading-7 text-muted-foreground">
-                  Ticket selection, discount stacking, and mock payment will plug
-                  into this panel during the booking phase.
+                  Select your tickets and proceed to checkout for seat selection and payment.
                 </p>
               </div>
 

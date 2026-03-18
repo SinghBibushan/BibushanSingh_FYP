@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { GoogleSignInButton } from "@/components/auth/google-signin-button";
 import { readJson } from "@/lib/api";
 import { registerSchema, type RegisterInput } from "@/lib/validations/auth";
 
@@ -21,7 +23,7 @@ type RegisterResponse = {
 
 export function RegisterForm() {
   const router = useRouter();
-  const [verifyUrl, setVerifyUrl] = useState<string | null>(null);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const form = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -44,10 +46,14 @@ export function RegisterForm() {
     });
 
     const data = await readJson<RegisterResponse>(response);
-    setVerifyUrl(data.verifyUrl ?? null);
+    setRegistrationSuccess(true);
     toast.success(data.message);
-    router.push("/dashboard");
-    router.refresh();
+
+    // Redirect to dashboard after 2 seconds
+    setTimeout(() => {
+      router.push("/dashboard");
+      router.refresh();
+    }, 2000);
   }
 
   return (
@@ -58,6 +64,14 @@ export function RegisterForm() {
           <p className="text-sm text-muted-foreground">
             Register once and move directly into event booking and loyalty flows.
           </p>
+        </div>
+
+        <GoogleSignInButton />
+
+        <div className="flex items-center gap-4">
+          <Separator className="flex-1" />
+          <span className="text-sm text-muted-foreground">OR</span>
+          <Separator className="flex-1" />
         </div>
 
         <form
@@ -121,20 +135,20 @@ export function RegisterForm() {
           </div>
 
           <div className="sm:col-span-2">
-            <Button className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Creating account..." : "Create account"}
+            <Button className="w-full" disabled={isSubmitting || registrationSuccess}>
+              {isSubmitting ? "Creating account..." : registrationSuccess ? "Account created! Check your email..." : "Create account"}
             </Button>
           </div>
         </form>
 
-        {verifyUrl ? (
-          <div className="rounded-2xl bg-muted p-4 text-sm text-muted-foreground">
-            Mock email mode is active. Verification link:
-            <a className="mt-2 block font-semibold text-secondary" href={verifyUrl}>
-              {verifyUrl}
-            </a>
+        {registrationSuccess && (
+          <div className="rounded-2xl bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 p-4 text-sm">
+            <p className="font-semibold text-green-800 mb-1">✅ Registration Successful!</p>
+            <p className="text-gray-700">
+              Please check your email inbox for a verification link to complete your registration.
+            </p>
           </div>
-        ) : null}
+        )}
 
         <p className="text-sm text-muted-foreground">
           Already registered?{" "}

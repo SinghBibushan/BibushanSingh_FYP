@@ -31,6 +31,7 @@ function toTicketView(ticket: {
 function toDemoEventListItem(event: DemoEvent): EventListItem {
   return {
     id: event.id,
+    _id: event.id,
     title: event.title,
     slug: event.slug,
     summary: event.summary,
@@ -104,6 +105,7 @@ async function getDbEvents(): Promise<EventListItem[]> {
 
     return {
       id: String(event._id),
+      _id: String(event._id),
       title: event.title,
       slug: event.slug,
       summary: event.summary,
@@ -147,6 +149,7 @@ async function getDbEventBySlug(slug: string): Promise<EventDetail | null> {
 
   return {
     id: String(event._id),
+    _id: String(event._id),
     title: event.title,
     slug: event.slug,
     summary: event.summary,

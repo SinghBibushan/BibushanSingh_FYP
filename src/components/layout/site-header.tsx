@@ -2,6 +2,7 @@ import { getSession } from "@/lib/auth";
 import Link from "next/link";
 
 import { LogoutButton } from "@/components/auth/logout-button";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { Button } from "@/components/ui/button";
 
 export async function SiteHeader() {
@@ -44,6 +45,7 @@ export async function SiteHeader() {
         <div className="flex items-center gap-3">
           {session ? (
             <>
+              <NotificationBell />
               <div className="hidden rounded-full bg-muted px-4 py-2 text-sm font-semibold text-foreground sm:block">
                 {session.name}
               </div>

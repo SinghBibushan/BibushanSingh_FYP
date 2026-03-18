@@ -18,6 +18,7 @@
 ```
 mongodb+srv://eventease_admin:EventEase2026@cluster0.xxxxx.mongodb.net/eventease?retryWrites=true&w=majority
 ```
+mongodb+srv://eventease_admin:EventEase2026@cluster0.9ygulok.mongodb.net/?appName=Cluster0
 
 ### 2. Generate JWT Secret
 Run this command in your terminal:
@@ -25,6 +26,8 @@ Run this command in your terminal:
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 Copy the output (it will be a long random string).
+
+b43e15c5f1284d2e045f77345711e9d8b4b96595e814fb6d3b69156089bfb354
 
 ### 3. Update .env File
 Open `.env` file in the project root and update:
@@ -200,3 +203,5 @@ npm run dev
 - ✅ Complete documentation
 
 **You're ready to go!** Just follow the checklist above.
+
+

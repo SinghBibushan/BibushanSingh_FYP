@@ -36,3 +36,6 @@ export async function connectToDatabase() {
   global.mongooseCache = globalCache;
   return globalCache.conn;
 }
+
+// Alias for compatibility
+export const connectDB = connectToDatabase;

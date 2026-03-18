@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 
 import { connectToDatabase } from "@/lib/db";
+import { Notification } from "@/models/Notification";
 import { NotificationLog } from "@/models/NotificationLog";
 import { sendEmail } from "@/server/notifications/mailer";
 
@@ -13,6 +14,31 @@ type NotificationInput = {
   message: string;
   payload?: Record<string, unknown>;
 };
+
+type InAppNotificationInput = {
+  userId: string;
+  type: "BOOKING_CONFIRMED" | "EVENT_REMINDER" | "PAYMENT_SUCCESS" | "REVIEW_REQUEST" | "CHAT_MESSAGE" | "EVENT_UPDATE" | "BOOKING_CANCELLED" | "STUDENT_VERIFIED" | "NEW_EVENT";
+  title: string;
+  message: string;
+  link?: string;
+  metadata?: Record<string, unknown>;
+};
+
+export async function createInAppNotification(input: InAppNotificationInput) {
+  await connectToDatabase();
+
+  const notification = await Notification.create({
+    userId: new Types.ObjectId(input.userId),
+    type: input.type,
+    title: input.title,
+    message: input.message,
+    link: input.link || "",
+    read: false,
+    metadata: input.metadata || {},
+  });
+
+  return notification;
+}
 
 export async function logNotification(input: NotificationInput) {
   await connectToDatabase();

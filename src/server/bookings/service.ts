@@ -20,7 +20,7 @@ import { PromoCode } from "@/models/PromoCode";
 import { TicketType } from "@/models/TicketType";
 import { User } from "@/models/User";
 import { getPublicEventBySlug } from "@/server/events/service";
-import { logNotification } from "@/server/notifications/service";
+import { logNotification, createInAppNotification } from "@/server/notifications/service";
 import { issueTicketsForBooking } from "@/server/tickets/service";
 import type { BookingQuote } from "@/types/booking";
 
@@ -469,6 +469,18 @@ export async function confirmMockPayment(input: MockPaymentConfirmInput) {
           paymentReference: payment.reference,
         },
       });
+
+      // Create in-app notification
+      await createInAppNotification({
+        userId: String(user._id),
+        type: "PAYMENT_SUCCESS",
+        title: "Payment Failed",
+        message: `Your payment for booking ${booking.bookingCode} failed. Please try again.`,
+        link: "/bookings",
+        metadata: {
+          bookingCode: booking.bookingCode,
+        },
+      });
     }
 
     return {
@@ -553,10 +565,112 @@ export async function confirmMockPayment(input: MockPaymentConfirmInput) {
           ticketsUrl: `${env.APP_URL}/tickets`,
         },
       });
+
+    // Create in-app notification
+    await createInAppNotification({
+      userId: String(user._id),
+      type: "BOOKING_CONFIRMED",
+      title: "Booking Confirmed!",
+      message: `Your booking ${booking.bookingCode} for ${event.title} is confirmed. Your tickets are ready!`,
+      link: "/tickets",
+      metadata: {
+        bookingCode: booking.bookingCode,
+        eventTitle: event.title,
+      },
+    });
   }
 
   return {
     message: "Mock payment successful. Booking confirmed.",
+    bookingCode: booking.bookingCode,
+    status: booking.status,
+  };
+}
+
+export async function cancelBooking(bookingCode: string) {
+  if (!env.MONGODB_URI) {
+    throw new Error("Database is required for booking cancellation.");
+  }
+
+  const session = await getSession();
+
+  if (!session) {
+    throw new Error("Unauthorized.");
+  }
+
+  await connectToDatabase();
+
+  const booking = await Booking.findOne({ bookingCode });
+
+  if (!booking) {
+    throw new Error("Booking not found.");
+  }
+
+  if (session.role !== "ADMIN" && String(booking.userId) !== session.sub) {
+    throw new Error("Unauthorized.");
+  }
+
+  if (booking.status === "CANCELLED") {
+    throw new Error("Booking is already cancelled.");
+  }
+
+  if (booking.status !== "CONFIRMED") {
+    throw new Error("Only confirmed bookings can be cancelled.");
+  }
+
+  // Refund tickets
+  for (const selection of booking.ticketSelections) {
+    await TicketType.findByIdAndUpdate(selection.ticketTypeId, {
+      $inc: { quantitySold: -selection.quantity },
+    });
+  }
+
+  // Refund loyalty points
+  const user = await User.findById(booking.userId);
+  const event = await Event.findById(booking.eventId);
+
+  if (user) {
+    user.loyaltyPoints = Math.max(
+      0,
+      user.loyaltyPoints + booking.loyaltyPointsRedeemed - booking.loyaltyPointsEarned,
+    );
+    user.loyaltyTier = deriveLoyaltyTier(user.loyaltyPoints);
+    await user.save();
+  }
+
+  booking.status = "CANCELLED";
+  await booking.save();
+
+  if (user && event) {
+    await logNotification({
+      userId: String(user._id),
+      email: user.email,
+      channel: "EMAIL",
+      type: "BOOKING_CANCELLED",
+      subject: "Booking cancelled",
+      message: `Your booking ${booking.bookingCode} for ${event.title} has been cancelled. Your loyalty points have been refunded.`,
+      payload: {
+        bookingCode: booking.bookingCode,
+        eventTitle: event.title,
+      },
+    });
+
+    // Create in-app notification
+    await createInAppNotification({
+      userId: String(user._id),
+      type: "BOOKING_CANCELLED",
+      title: "Booking Cancelled",
+      message: `Your booking ${booking.bookingCode} for ${event.title} has been cancelled.`,
+      link: "/bookings",
+      metadata: {
+        bookingCode: booking.bookingCode,
+        eventTitle: event.title,
+      },
+    });
+  }
+
+  return {
+    message: "Booking cancelled successfully.",
     bookingCode: booking.bookingCode,
     status: booking.status,
   };

@@ -37,66 +37,76 @@ export default async function TicketsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-5 xl:grid-cols-2">
+        <div className="grid gap-5 lg:grid-cols-2">
           {tickets.map((ticket) => (
-            <Card key={ticket.ticketCode} className="overflow-hidden">
-              <CardContent className="grid gap-6 p-6 md:grid-cols-[1fr_220px]">
-                <div className="space-y-4">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <Badge>{ticket.ticketTypeName}</Badge>
-                    <Badge className={ticket.status === "ACTIVE" ? "bg-emerald-100 text-emerald-700" : ""}>
-                      {ticket.status}
-                    </Badge>
-                  </div>
-                  <div className="space-y-2">
-                    <h2 className="text-3xl leading-none">{ticket.eventTitle}</h2>
-                    <p className="text-sm leading-7 text-muted-foreground">
-                      {ticket.eventVenue}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {formatDate(ticket.eventStartsAt)}
-                    </p>
-                  </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-2xl bg-muted p-4">
-                      <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
-                        Ticket code
-                      </p>
-                      <p className="mt-2 font-semibold">{ticket.ticketCode}</p>
-                    </div>
-                    <div className="rounded-2xl bg-muted p-4">
-                      <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
-                        Booking code
-                      </p>
-                      <p className="mt-2 font-semibold">{ticket.bookingCode}</p>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-3">
-                    <Link
-                      href={`/api/tickets/${ticket.ticketCode}/pdf`}
-                      className="inline-flex rounded-full bg-secondary px-5 py-3 text-sm font-semibold text-secondary-foreground"
-                    >
-                      Download PDF
-                    </Link>
-                    {ticket.eventSlug ? (
-                      <Link
-                        href={`/events/${ticket.eventSlug}`}
-                        className="inline-flex rounded-full border border-border px-5 py-3 text-sm font-semibold text-foreground"
+            <Card key={ticket.ticketCode} className="overflow-hidden hover-lift">
+              <CardContent className="p-6">
+                <div className="grid gap-6 lg:grid-cols-[1fr_auto]">
+                  <div className="space-y-4">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <Badge className="bg-secondary text-secondary-foreground">{ticket.ticketTypeName}</Badge>
+                      <Badge
+                        className={
+                          ticket.status === "ACTIVE"
+                            ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+                            : ""
+                        }
                       >
-                        View event
+                        {ticket.status}
+                      </Badge>
+                    </div>
+                    <div className="space-y-2">
+                      <h2 className="text-2xl font-bold leading-tight">{ticket.eventTitle}</h2>
+                      <p className="text-sm leading-7 text-muted-foreground">
+                        {ticket.eventVenue}
+                      </p>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        {formatDate(ticket.eventStartsAt)}
+                      </p>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-2xl bg-muted p-4">
+                        <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                          Ticket code
+                        </p>
+                        <p className="mt-2 font-mono text-sm font-semibold">{ticket.ticketCode}</p>
+                      </div>
+                      <div className="rounded-2xl bg-muted p-4">
+                        <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                          Booking code
+                        </p>
+                        <p className="mt-2 font-mono text-sm font-semibold">{ticket.bookingCode}</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-3 pt-2">
+                      <Link
+                        href={`/api/tickets/${ticket.ticketCode}/pdf`}
+                        className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+                      >
+                        Download PDF
                       </Link>
-                    ) : null}
+                      {ticket.eventSlug ? (
+                        <Link
+                          href={`/events/${ticket.eventSlug}`}
+                          className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-semibold text-foreground transition hover:bg-muted"
+                        >
+                          View event
+                        </Link>
+                      ) : null}
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center justify-center rounded-[28px] bg-muted p-4">
-                  <Image
-                    src={ticket.qrCodeDataUrl}
-                    alt={`QR code for ${ticket.ticketCode}`}
-                    width={180}
-                    height={180}
-                    unoptimized
-                    className="h-[180px] w-[180px] rounded-2xl bg-white p-2"
-                  />
+                  <div className="flex items-center justify-center">
+                    <div className="rounded-[24px] bg-muted p-4">
+                      <Image
+                        src={ticket.qrCodeDataUrl}
+                        alt={`QR code for ${ticket.ticketCode}`}
+                        width={180}
+                        height={180}
+                        unoptimized
+                        className="h-[180px] w-[180px] rounded-2xl bg-white p-3 shadow-sm"
+                      />
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
