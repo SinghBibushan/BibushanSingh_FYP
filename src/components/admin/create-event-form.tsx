@@ -84,15 +84,19 @@ export function CreateEventForm() {
   }
 
   return (
-    <Card>
-      <CardContent className="p-6">
-        <form className="grid gap-4" onSubmit={handleSubmit}>
-          <div className="space-y-2">
-            <h2 className="text-3xl leading-none">Create event</h2>
-            <p className="text-sm text-muted-foreground">
-              Minimal admin creation flow for viva. It creates the event and its first ticket type.
+    <Card className="bg-white/78">
+      <CardContent>
+        <form className="grid gap-6" onSubmit={handleSubmit}>
+          <div className="space-y-3">
+            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-secondary">
+              Create event
+            </p>
+            <h2 className="text-3xl leading-none">Launch a new public listing</h2>
+            <p className="text-sm leading-7 text-muted-foreground">
+              This form creates the event and its first ticket type in one step.
             </p>
           </div>
+
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2 md:col-span-2">
               <Label>Title</Label>
@@ -105,7 +109,7 @@ export function CreateEventForm() {
             <div className="space-y-2 md:col-span-2">
               <Label>Description</Label>
               <textarea
-                className="min-h-28 w-full rounded-2xl border border-border bg-white px-4 py-3 text-sm"
+                className="min-h-32 w-full rounded-2xl border border-border bg-white/70 px-4 py-3 text-sm text-foreground outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]"
                 value={form.description}
                 onChange={(e) => update("description", e.target.value)}
               />
@@ -148,26 +152,33 @@ export function CreateEventForm() {
             </div>
           </div>
 
-          <div className="grid gap-4 rounded-2xl bg-muted p-4 md:grid-cols-3">
-            <div className="space-y-2">
-              <Label>Ticket name</Label>
-              <Input value={form.ticketName} onChange={(e) => update("ticketName", e.target.value)} />
+          <div className="rounded-[26px] border border-border bg-[linear-gradient(145deg,#f8f3ea_0%,#f2e5d6_100%)] p-5">
+            <div className="mb-4">
+              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-secondary">
+                Primary ticket type
+              </p>
             </div>
-            <div className="space-y-2">
-              <Label>Ticket price</Label>
-              <Input type="number" value={form.ticketPrice} onChange={(e) => update("ticketPrice", e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Quantity</Label>
-              <Input type="number" value={form.ticketQuantity} onChange={(e) => update("ticketQuantity", e.target.value)} />
-            </div>
-            <div className="space-y-2 md:col-span-3">
-              <Label>Ticket description</Label>
-              <Input value={form.ticketDescription} onChange={(e) => update("ticketDescription", e.target.value)} />
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="space-y-2">
+                <Label>Ticket name</Label>
+                <Input value={form.ticketName} onChange={(e) => update("ticketName", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Ticket price</Label>
+                <Input type="number" value={form.ticketPrice} onChange={(e) => update("ticketPrice", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Quantity</Label>
+                <Input type="number" value={form.ticketQuantity} onChange={(e) => update("ticketQuantity", e.target.value)} />
+              </div>
+              <div className="space-y-2 md:col-span-3">
+                <Label>Ticket description</Label>
+                <Input value={form.ticketDescription} onChange={(e) => update("ticketDescription", e.target.value)} />
+              </div>
             </div>
           </div>
 
-          <label className="flex items-center gap-3 text-sm">
+          <label className="flex items-center gap-3 text-sm text-muted-foreground">
             <input
               type="checkbox"
               checked={form.featured}

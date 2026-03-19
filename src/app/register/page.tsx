@@ -16,12 +16,16 @@ export default async function RegisterPage() {
     <div className="pb-16">
       <SiteHeader />
       <main className="container-shell grid min-h-[calc(100vh-5rem)] items-center gap-8 py-14 lg:grid-cols-[0.95fr_1.05fr]">
-        <AuthPanel
-          eyebrow="Registration"
-          title="Create an account that is ready for bookings and loyalty rewards."
-          description="New users are signed in immediately, then guided into email verification through a mock-safe flow that still works without SMTP."
-        />
-        <RegisterForm />
+        <div className="opacity-0 animate-slide-in-left">
+          <AuthPanel
+            eyebrow="Registration"
+            title="Create an account that is immediately ready for live booking flows."
+            description="New users move into a polished onboarding path with verification, account security, and direct access to tickets, loyalty, and future event activity."
+          />
+        </div>
+        <div className="opacity-0 animate-slide-in-right delay-200">
+          <RegisterForm />
+        </div>
       </main>
     </div>
   );

@@ -97,7 +97,7 @@ npm run dev
 ```
 
 Open http://localhost:3000 and test login with:
-- Email: `admin@eventease.demo`
+- Email: `admin@gmail.com`
 - Password: `Password123`
 
 ## Step 9: For Your Friend's Computer (During Viva)

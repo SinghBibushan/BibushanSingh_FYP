@@ -7,6 +7,9 @@ export type EventTicketView = {
   quantityTotal: number;
   quantitySold: number;
   quantityRemaining: number;
+  perUserLimit: number;
+  saleStartsAt?: string;
+  saleEndsAt?: string;
   benefits: string[];
 };
 

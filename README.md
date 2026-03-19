@@ -57,9 +57,9 @@ If `3000` is busy, Next.js may use another port.
 
 ## Demo credentials
 
-- Admin: `admin@eventease.demo`
+- Admin: `admin@gmail.com`
 - Admin password: `Password123`
-- User: `user@eventease.demo`
+- User: `user@gmail.com`
 - User password: `Password123`
 
 ## Recommended database choice for viva
@@ -122,6 +122,8 @@ Required:
 Important optional values:
 
 - `APP_URL`
+- `GOOGLE_CLIENT_ID`
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
 - `MOCK_PAYMENT_ENABLED`
 - `MOCK_EMAIL_ENABLED`
 - `SMTP_HOST`
@@ -131,6 +133,7 @@ Important optional values:
 - `SMTP_FROM`
 - `UPLOAD_DIR`
 - `MAP_EMBED_API_KEY`
+- `OPENWEATHER_API_KEY`
 
 ## Scripts
 
@@ -140,9 +143,29 @@ npm run build
 npm run start
 npm run lint
 npm run typecheck
+npm test
 npm run db:seed
 npm run db:reset
 ```
+
+## Production-readiness checks
+
+Before deployment, verify:
+
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
+
+Current hardening highlights:
+
+- session auth is normalized across email/password and Google sign-in
+- Google sign-in is disabled unless both Google client ID env vars are configured
+- promo validation, ticket availability, and booking confirmation are enforced server-side
+- wishlist and review APIs validate identifiers and return consistent error responses
+- full production build succeeds without code changes
 
 ## Health check
 

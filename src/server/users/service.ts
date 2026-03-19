@@ -6,6 +6,7 @@ import { Types } from "mongoose";
 import { getSession } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db";
 import { env } from "@/lib/env";
+import { AppError } from "@/lib/errors";
 import {
   adminUserUpdateSchema,
   updateProfileSchema,
@@ -21,7 +22,7 @@ async function requireSession() {
   const session = await getSession();
 
   if (!session) {
-    throw new Error("Unauthorized.");
+    throw new AppError("Unauthorized.", 401, "UNAUTHORIZED");
   }
 
   await connectToDatabase();
@@ -32,7 +33,7 @@ async function requireAdminSession() {
   const session = await requireSession();
 
   if (session.role !== "ADMIN") {
-    throw new Error("Forbidden.");
+    throw new AppError("Forbidden.", 403, "FORBIDDEN");
   }
 
   return session;
@@ -54,7 +55,7 @@ export async function updateCurrentUserProfile(input: UpdateProfileInput) {
   ).lean();
 
   if (!user) {
-    throw new Error("User not found.");
+    throw new AppError("User not found.", 404, "NOT_FOUND");
   }
 
   return {
@@ -79,11 +80,11 @@ export async function submitStudentVerification(formData: FormData) {
   const file = formData.get("document");
 
   if (!(file instanceof File)) {
-    throw new Error("Document file is required.");
+    throw new AppError("Document file is required.", 400, "FILE_REQUIRED");
   }
 
   if (file.size === 0) {
-    throw new Error("Uploaded file is empty.");
+    throw new AppError("Uploaded file is empty.", 400, "EMPTY_FILE");
   }
 
   const allowedTypes = [
@@ -94,7 +95,7 @@ export async function submitStudentVerification(formData: FormData) {
   ];
 
   if (!allowedTypes.includes(file.type)) {
-    throw new Error("Only PNG, JPG, WEBP, or PDF files are allowed.");
+    throw new AppError("Only PNG, JPG, WEBP, or PDF files are allowed.", 400, "INVALID_FILE_TYPE");
   }
 
   const uploadDir = path.join(process.cwd(), env.UPLOAD_DIR, "student-verifications");
@@ -196,7 +197,7 @@ export async function adminUpdateUser(id: string, input: AdminUserUpdateInput) {
   ).lean();
 
   if (!user) {
-    throw new Error("User not found.");
+    throw new AppError("User not found.", 404, "NOT_FOUND");
   }
 
   return {

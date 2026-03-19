@@ -299,7 +299,7 @@ All API routes are properly connected and functional:
 - Collections properly seeded
 
 ### Demo Accounts ✅
-- Admin: `admin@eventease.demo` / `Password123`
+- Admin: `admin@gmail.com` / `Password123`
 - User: `user@eventease.demo` / `Password123`
 
 ### Email System ✅

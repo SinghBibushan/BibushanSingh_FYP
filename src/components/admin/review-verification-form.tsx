@@ -43,7 +43,10 @@ export function ReviewVerificationForm({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 rounded-[22px] border border-border bg-[linear-gradient(145deg,#f8f3ea_0%,#f2e5d6_100%)] p-4">
+      <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-secondary">
+        Review action
+      </p>
       <Input
         placeholder={
           currentStatus === "PENDING" ? "Add review note" : "Update review note"
@@ -64,6 +67,7 @@ export function ReviewVerificationForm({
           variant="outline"
           onClick={() => submit("REJECTED")}
           disabled={loading !== null}
+          className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
         >
           {loading === "REJECTED" ? "Saving..." : "Reject"}
         </Button>

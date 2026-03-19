@@ -1,13 +1,11 @@
-import { SiteHeader } from "@/components/layout/site-header";
-import { Badge } from "@/components/ui/badge";
+import { Compass } from "lucide-react";
+
 import { EventCard } from "@/components/events/event-card";
 import { EventEmptyState } from "@/components/events/event-empty-state";
 import { EventFilters } from "@/components/events/event-filters";
-import {
-  getEventFilterOptions,
-  getPublicEvents,
-} from "@/server/events/service";
-import { Sparkles } from "lucide-react";
+import { SiteHeader } from "@/components/layout/site-header";
+import { Badge } from "@/components/ui/badge";
+import { getEventFilterOptions, getPublicEvents } from "@/server/events/service";
 
 export default async function EventsPage({
   searchParams,
@@ -32,24 +30,27 @@ export default async function EventsPage({
     <div className="pb-16">
       <SiteHeader />
       <main className="container-shell space-y-10 py-14">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between opacity-0 animate-fade-in">
-          <div className="space-y-3">
-            <Badge className="bg-gradient-to-r from-primary via-secondary to-accent text-white border-0">
-              <Sparkles className="h-3 w-3 mr-1" />
-              Discover Events
+        <div className="grid gap-5 opacity-0 animate-fade-in lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="space-y-4">
+            <Badge className="bg-white/80 text-primary">
+              <Compass className="mr-2 h-3 w-3" />
+              Browse catalogue
             </Badge>
-            <h1 className="text-5xl leading-none font-bold">
-              Upcoming <span className="gradient-text">Events</span> Across Nepal
+            <h1 className="max-w-4xl text-5xl leading-[0.95] md:text-6xl">
+              Discover professionally presented events across Nepal.
             </h1>
             <p className="max-w-3xl text-base leading-8 text-muted-foreground">
-              From electrifying concerts to cultural festivals, find and book tickets for the most exciting events happening near you.
+              Browse by city, category, or featured status and move from discovery into
+              booking with a cleaner, more focused event selection flow.
             </p>
           </div>
-          <div className="rounded-[28px] bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 px-6 py-4 border border-primary/30 hover-lift backdrop-blur-sm">
-            <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
-              Available Events
+          <div className="rounded-[28px] border border-border bg-white/72 px-6 py-4 shadow-[0_16px_40px_rgba(24,34,53,0.07)]">
+            <p className="text-[0.72rem] uppercase tracking-[0.22em] text-muted-foreground">
+              Available events
             </p>
-            <p className="mt-2 text-3xl leading-none font-bold gradient-text">{events.length}</p>
+            <p className="mt-2 text-3xl font-semibold leading-none text-foreground">
+              {events.length}
+            </p>
           </div>
         </div>
 
@@ -74,7 +75,7 @@ export default async function EventsPage({
               <div
                 key={event.slug}
                 className="opacity-0 animate-scale-in"
-                style={{ animationDelay: `${index * 0.1}s` }}
+                style={{ animationDelay: `${index * 0.08}s` }}
               >
                 <EventCard event={event} />
               </div>

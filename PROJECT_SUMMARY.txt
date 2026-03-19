@@ -142,7 +142,7 @@
 
   3. LOGIN CREDENTIALS:
      👤 User:  user@eventease.demo / Password123
-     👨‍💼 Admin: admin@eventease.demo / Password123
+     👨‍💼 Admin: admin@gmail.com / Password123
 
   4. TEST NEW FEATURES:
      ✓ Check notification bell in header

@@ -49,8 +49,8 @@ npm run db:reset
 ```
 
 This creates:
-- Admin account: `admin@eventease.demo` / `Password123`
-- User account: `user@eventease.demo` / `Password123`
+- Admin account: `admin@gmail.com` / `Password123`
+- User account: `user@gmail.com` / `Password123`
 - Sample events
 - Sample promo codes
 - Sample bookings
@@ -64,7 +64,7 @@ npm run dev
 Open: http://localhost:3000
 
 Try logging in with:
-- Email: `admin@eventease.demo`
+- Email: `admin@gmail.com`
 - Password: `Password123`
 
 ---
@@ -117,7 +117,7 @@ npm run dev
 
 ### 2. User Registration & Login
 - [ ] Register a new user (or use demo user)
-- [ ] Login with: `user@eventease.demo` / `Password123`
+- [ ] Login with: `user@gmail.com` / `Password123`
 - [ ] Show user dashboard
 
 ### 3. Booking Flow
@@ -138,7 +138,7 @@ npm run dev
 - [ ] Show points and tier
 
 ### 5. Admin Panel
-- [ ] Logout and login as admin: `admin@eventease.demo` / `Password123`
+- [ ] Logout and login as admin: `admin@gmail.com` / `Password123`
 - [ ] Go to `/admin`
 - [ ] Show dashboard metrics
 - [ ] Create a new event at `/admin/events`

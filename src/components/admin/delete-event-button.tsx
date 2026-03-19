@@ -28,7 +28,12 @@ export function DeleteEventButton({ id }: { id: string }) {
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={handleDelete}>
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={handleDelete}
+      className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+    >
       Delete
     </Button>
   );

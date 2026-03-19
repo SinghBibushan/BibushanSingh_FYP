@@ -164,7 +164,7 @@ Open: http://localhost:3000
 
 ### 3. Test Features
 - Login as user: `user@eventease.demo` / `Password123`
-- Login as admin: `admin@eventease.demo` / `Password123`
+- Login as admin: `admin@gmail.com` / `Password123`
 
 ---
 

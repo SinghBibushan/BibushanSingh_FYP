@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentUser, getSession } from "@/lib/auth";
+import { isMockPaymentEnabled, isPayPalEnabled } from "@/lib/env";
 import { formatDate } from "@/lib/utils";
 import { getPublicEventBySlug } from "@/server/events/service";
 
@@ -22,6 +23,11 @@ export default async function CheckoutPage({
   const user = await getCurrentUser();
   const { slug } = await params;
   const event = await getPublicEventBySlug(slug);
+  const paymentMode = isMockPaymentEnabled
+    ? "MOCK"
+    : isPayPalEnabled
+      ? "PAYPAL"
+      : "NONE";
 
   if (!event) {
     notFound();
@@ -56,6 +62,7 @@ export default async function CheckoutPage({
           event={event}
           loyaltyPoints={user?.loyaltyPoints ?? 0}
           studentVerified={user?.studentVerificationStatus === "APPROVED"}
+          paymentMode={paymentMode}
         />
       </main>
     </div>

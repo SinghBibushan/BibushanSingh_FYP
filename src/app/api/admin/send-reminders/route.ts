@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+
 import { connectToDatabase } from "@/lib/db";
+import { getErrorMessage, getErrorStatus } from "@/lib/errors";
 import { Event } from "@/models/Event";
 import { Booking } from "@/models/Booking";
 import { User } from "@/models/User";
@@ -103,10 +105,9 @@ export async function POST(req: Request) {
       eventsFound: upcomingEvents.length,
     });
   } catch (error) {
-    console.error("Error sending event reminders:", error);
     return NextResponse.json(
-      { error: "Failed to send event reminders" },
-      { status: 500 }
+      { error: getErrorMessage(error, "Failed to send event reminders.") },
+      { status: getErrorStatus(error) },
     );
   }
 }

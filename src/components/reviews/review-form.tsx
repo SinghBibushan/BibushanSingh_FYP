@@ -4,6 +4,10 @@ import { useState } from "react";
 import { Star } from "lucide-react";
 import { toast } from "sonner";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
 interface ReviewFormProps {
   eventId: string;
   bookingId: string;
@@ -16,11 +20,11 @@ export function ReviewForm({ eventId, bookingId, onSuccess }: ReviewFormProps) {
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (rating === 0) {
-      toast.error("Please select a rating");
+      toast.error("Please select a rating.");
       return;
     }
 
@@ -38,41 +42,48 @@ export function ReviewForm({ eventId, bookingId, onSuccess }: ReviewFormProps) {
           comment,
         }),
       });
+      const data = (await res.json()) as { error?: string };
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to submit review");
+        throw new Error(data.error ?? "Failed to submit review.");
       }
 
-      toast.success("Review submitted successfully!");
+      toast.success("Review submitted successfully.");
       setRating(0);
       setTitle("");
       setComment("");
       onSuccess?.();
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to submit review.");
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 border rounded-lg p-6">
-      <h3 className="text-xl font-semibold">Write a Review</h3>
+    <form onSubmit={handleSubmit} className="space-y-5 rounded-[26px] border border-border bg-white/82 p-6">
+      <div className="space-y-2">
+        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-secondary">
+          Write a review
+        </p>
+        <h3 className="text-2xl font-semibold leading-none text-foreground">
+          Share your experience
+        </h3>
+      </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2">Rating</label>
+      <div className="space-y-2">
+        <Label>Rating</Label>
         <div className="flex gap-2">
           {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
               type="button"
               onClick={() => setRating(star)}
-              className="focus:outline-none"
+              className="rounded-full border border-border bg-white p-2 transition hover:border-secondary/40"
             >
               <Star
-                className={`w-8 h-8 ${
-                  star <= rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                className={`h-6 w-6 ${
+                  star <= rating ? "fill-secondary text-secondary" : "text-muted-foreground/35"
                 }`}
               />
             </button>
@@ -80,39 +91,37 @@ export function ReviewForm({ eventId, bookingId, onSuccess }: ReviewFormProps) {
         </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2">Title</label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="review-title">Title</Label>
+        <Input
+          id="review-title"
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           maxLength={100}
           required
-          className="w-full px-4 py-2 border rounded-lg"
           placeholder="Summarize your experience"
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2">Review</label>
+      <div className="space-y-2">
+        <Label htmlFor="review-comment">Review</Label>
         <textarea
+          id="review-comment"
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           maxLength={1000}
           required
-          rows={4}
-          className="w-full px-4 py-2 border rounded-lg"
+          rows={5}
+          className="min-h-32 w-full rounded-2xl border border-border bg-white/70 px-4 py-3 text-sm text-foreground outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]"
           placeholder="Share your thoughts about the event"
         />
+        <p className="text-xs text-muted-foreground">{comment.length}/1000 characters</p>
       </div>
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-      >
-        {submitting ? "Submitting..." : "Submit Review"}
-      </button>
+      <Button type="submit" disabled={submitting} className="w-full">
+        {submitting ? "Submitting..." : "Submit review"}
+      </Button>
     </form>
   );
 }

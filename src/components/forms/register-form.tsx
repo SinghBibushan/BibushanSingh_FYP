@@ -7,12 +7,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
+import { GoogleSignInButton } from "@/components/auth/google-signin-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { GoogleSignInButton } from "@/components/auth/google-signin-button";
 import { readJson } from "@/lib/api";
 import { registerSchema, type RegisterInput } from "@/lib/validations/auth";
 
@@ -23,6 +23,7 @@ type RegisterResponse = {
 
 export function RegisterForm() {
   const router = useRouter();
+  const googleAuthEnabled = Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const form = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -49,7 +50,6 @@ export function RegisterForm() {
     setRegistrationSuccess(true);
     toast.success(data.message);
 
-    // Redirect to dashboard after 2 seconds
     setTimeout(() => {
       router.push("/dashboard");
       router.refresh();
@@ -57,22 +57,31 @@ export function RegisterForm() {
   }
 
   return (
-    <Card className="mx-auto w-full max-w-xl">
-      <CardContent className="space-y-6 p-8">
-        <div className="space-y-2">
-          <h2 className="text-4xl leading-none">Create account</h2>
-          <p className="text-sm text-muted-foreground">
-            Register once and move directly into event booking and loyalty flows.
+    <Card className="mx-auto w-full max-w-xl bg-white/78 shadow-[0_26px_70px_rgba(24,34,53,0.1)]">
+      <CardContent className="space-y-6">
+        <div className="space-y-3">
+          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-secondary">
+            Create account
+          </p>
+          <h2 className="text-4xl leading-none">Set up your EventEase access</h2>
+          <p className="text-sm leading-7 text-muted-foreground">
+            Register once to manage bookings, receive event updates, and move into the
+            loyalty and ticketing flows without friction.
           </p>
         </div>
 
-        <GoogleSignInButton />
-
-        <div className="flex items-center gap-4">
-          <Separator className="flex-1" />
-          <span className="text-sm text-muted-foreground">OR</span>
-          <Separator className="flex-1" />
-        </div>
+        {googleAuthEnabled ? (
+          <>
+            <GoogleSignInButton />
+            <div className="flex items-center gap-4">
+              <Separator className="flex-1" />
+              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Or register with email
+              </span>
+              <Separator className="flex-1" />
+            </div>
+          </>
+        ) : null}
 
         <form
           className="grid gap-4 sm:grid-cols-2"
@@ -80,30 +89,20 @@ export function RegisterForm() {
             try {
               await onSubmit(values);
             } catch (error) {
-              toast.error(
-                error instanceof Error ? error.message : "Registration failed.",
-              );
+              toast.error(error instanceof Error ? error.message : "Registration failed.");
             }
           })}
         >
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="name">Full name</Label>
-            <Input id="name" placeholder="Bibushan Singh" {...form.register("name")} />
-            {errors.name ? (
-              <p className="text-sm text-red-600">{errors.name.message}</p>
-            ) : null}
+            <Input id="name" placeholder="Your full name" {...form.register("name")} />
+            {errors.name ? <p className="text-sm text-red-600">{errors.name.message}</p> : null}
           </div>
 
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              placeholder="bibushan@example.com"
-              {...form.register("email")}
-            />
-            {errors.email ? (
-              <p className="text-sm text-red-600">{errors.email.message}</p>
-            ) : null}
+            <Input id="email" placeholder="you@example.com" {...form.register("email")} />
+            {errors.email ? <p className="text-sm text-red-600">{errors.email.message}</p> : null}
           </div>
 
           <div className="space-y-2">
@@ -124,38 +123,41 @@ export function RegisterForm() {
             <Input
               id="confirmPassword"
               type="password"
-              placeholder="Repeat your password"
+              placeholder="Repeat password"
               {...form.register("confirmPassword")}
             />
             {errors.confirmPassword ? (
-              <p className="text-sm text-red-600">
-                {errors.confirmPassword.message}
-              </p>
+              <p className="text-sm text-red-600">{errors.confirmPassword.message}</p>
             ) : null}
           </div>
 
           <div className="sm:col-span-2">
             <Button className="w-full" disabled={isSubmitting || registrationSuccess}>
-              {isSubmitting ? "Creating account..." : registrationSuccess ? "Account created! Check your email..." : "Create account"}
+              {isSubmitting
+                ? "Creating account..."
+                : registrationSuccess
+                  ? "Account created. Check your email..."
+                  : "Create account"}
             </Button>
           </div>
         </form>
 
-        {registrationSuccess && (
-          <div className="rounded-2xl bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 p-4 text-sm">
-            <p className="font-semibold text-green-800 mb-1">✅ Registration Successful!</p>
-            <p className="text-gray-700">
-              Please check your email inbox for a verification link to complete your registration.
+        {registrationSuccess ? (
+          <div className="rounded-[24px] border border-accent/20 bg-accent/8 p-4 text-sm">
+            <p className="mb-1 font-semibold text-foreground">Registration successful.</p>
+            <p className="text-muted-foreground">
+              Check your inbox for the verification link before continuing into the full
+              platform experience.
             </p>
           </div>
-        )}
+        ) : null}
 
-        <p className="text-sm text-muted-foreground">
+        <div className="rounded-[24px] border border-border bg-white/66 p-4 text-sm text-muted-foreground">
           Already registered?{" "}
-          <Link href="/login" className="font-semibold text-secondary">
+          <Link href="/login" className="font-semibold text-primary">
             Log in
           </Link>
-        </p>
+        </div>
       </CardContent>
     </Card>
   );

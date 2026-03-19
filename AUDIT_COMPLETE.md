@@ -60,7 +60,7 @@ npm run dev
 
 ### Demo Credentials
 **Admin Account:**
-- Email: `admin@eventease.demo`
+- Email: `admin@gmail.com`
 - Password: `Password123`
 
 **User Account:**

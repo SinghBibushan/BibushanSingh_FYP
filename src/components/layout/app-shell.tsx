@@ -28,14 +28,16 @@ export function AppShell({
   return (
     <div className="pb-16">
       <SiteHeader />
-      <main className="container-shell grid gap-8 py-14 lg:grid-cols-[260px_1fr]">
-        <aside className="space-y-4">
+      <main className="container-shell grid gap-8 py-12 lg:grid-cols-[280px_1fr]">
+        <aside className="space-y-5">
           <Badge>{badge}</Badge>
-          <div className="space-y-3">
-            <h1 className="text-5xl leading-none">{title}</h1>
-            <p className="text-sm leading-7 text-muted-foreground">{description}</p>
+          <div className="rounded-[30px] border border-border bg-white/68 p-6 shadow-[0_18px_45px_rgba(24,34,53,0.06)]">
+            <div className="space-y-3">
+              <h1 className="text-4xl leading-tight md:text-5xl">{title}</h1>
+              <p className="text-sm leading-7 text-muted-foreground">{description}</p>
+            </div>
           </div>
-          <nav className="space-y-2 rounded-[28px] border border-border bg-card p-3">
+          <nav className="space-y-2 rounded-[30px] border border-border bg-card p-3 shadow-[0_18px_45px_rgba(24,34,53,0.06)]">
             {navItems.map((item) => (
               <Link
                 key={item.href}
@@ -43,8 +45,8 @@ export function AppShell({
                 className={cn(
                   "block rounded-2xl px-4 py-3 text-sm font-semibold transition",
                   currentPath === item.href
-                    ? "bg-secondary text-secondary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    ? "bg-primary text-primary-foreground shadow-[0_12px_24px_rgba(24,34,53,0.16)]"
+                    : "text-muted-foreground hover:bg-white hover:text-foreground",
                 )}
               >
                 {item.label}
@@ -52,7 +54,9 @@ export function AppShell({
             ))}
           </nav>
         </aside>
-        <section>{children}</section>
+        <section className="rounded-[34px] border border-border bg-white/62 p-1 shadow-[0_18px_45px_rgba(24,34,53,0.06)]">
+          <div className="rounded-[30px] bg-card p-6 md:p-8">{children}</div>
+        </section>
       </main>
     </div>
   );

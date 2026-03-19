@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
 import { MockPaymentPanel } from "@/components/forms/mock-payment-panel";
+import { PayPalPaymentPanel } from "@/components/forms/paypal-payment-panel";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,8 +35,13 @@ export default async function BookingDetailsPage({
     startsAt: Date | string;
   };
   const payment = booking.paymentId as {
+    provider: string;
     reference: string;
     status: string;
+    meta?: {
+      payableCurrency?: string;
+      payableAmount?: string;
+    };
   };
 
   return (
@@ -145,15 +151,26 @@ export default async function BookingDetailsPage({
 
           <Card>
             <CardContent className="space-y-4 p-6">
-              <h2 className="text-3xl leading-none">Mock payment</h2>
+              <h2 className="text-3xl leading-none">
+                {payment.provider === "PAYPAL" ? "PayPal payment" : "Mock payment"}
+              </h2>
               <p className="text-sm leading-7 text-muted-foreground">
-                Use the buttons below to simulate a successful or failed payment.
-                On success, booking status becomes confirmed and loyalty points are updated.
+                {payment.provider === "PAYPAL"
+                  ? `Complete checkout with PayPal to confirm this booking${payment.meta?.payableAmount && payment.meta?.payableCurrency ? ` for ${payment.meta.payableCurrency} ${payment.meta.payableAmount}` : ""}.`
+                  : "Use the buttons below to simulate a successful or failed payment. On success, booking status becomes confirmed and loyalty points are updated."}
               </p>
-              <MockPaymentPanel
-                bookingCode={booking.bookingCode}
-                disabled={booking.status === "CONFIRMED"}
-              />
+              {payment.provider === "PAYPAL" ? (
+                <PayPalPaymentPanel
+                  bookingCode={booking.bookingCode}
+                  currency={payment.meta?.payableCurrency ?? "USD"}
+                  disabled={booking.status === "CONFIRMED"}
+                />
+              ) : (
+                <MockPaymentPanel
+                  bookingCode={booking.bookingCode}
+                  disabled={booking.status === "CONFIRMED"}
+                />
+              )}
             </CardContent>
           </Card>
         </aside>

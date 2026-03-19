@@ -125,7 +125,7 @@ Open [http://localhost:3000](http://localhost:3000)
 ## 🧪 Testing the Features
 
 ### Test Seat Selection
-1. Login as admin: `admin@eventease.demo` / `Password123`
+1. Login as admin: `admin@gmail.com` / `Password123`
 2. Create seat layout via API or admin panel
 3. Go to event booking page
 4. See interactive seat map

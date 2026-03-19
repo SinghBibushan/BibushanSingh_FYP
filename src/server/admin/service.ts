@@ -4,6 +4,7 @@ import { getSession } from "@/lib/auth";
 import { demoEvents, demoPromoCodes } from "@/lib/demo-data";
 import { connectToDatabase } from "@/lib/db";
 import { env } from "@/lib/env";
+import { AppError } from "@/lib/errors";
 import {
   adminEventSchema,
   adminPromoCodeSchema,
@@ -15,22 +16,29 @@ import {
 import { slugify } from "@/lib/utils";
 import { AuditLog } from "@/models/AuditLog";
 import { Booking } from "@/models/Booking";
+import { ChatMessage } from "@/models/ChatMessage";
 import { Event } from "@/models/Event";
+import { Notification } from "@/models/Notification";
+import { NotificationLog } from "@/models/NotificationLog";
+import { Payment } from "@/models/Payment";
 import { PromoCode } from "@/models/PromoCode";
+import { Review } from "@/models/Review";
 import { StudentVerification } from "@/models/StudentVerification";
+import { Ticket } from "@/models/Ticket";
 import { TicketType } from "@/models/TicketType";
 import { User } from "@/models/User";
+import { Wishlist } from "@/models/Wishlist";
 import { logNotification, createInAppNotification } from "@/server/notifications/service";
 
 async function requireAdminApiSession() {
   const session = await getSession();
 
   if (!session) {
-    throw new Error("Unauthorized.");
+    throw new AppError("Unauthorized.", 401, "UNAUTHORIZED");
   }
 
   if (session.role !== "ADMIN") {
-    throw new Error("Forbidden.");
+    throw new AppError("Forbidden.", 403, "FORBIDDEN");
   }
 
   return session;
@@ -144,7 +152,7 @@ export async function listAdminEvents() {
 export async function createAdminEvent(input: AdminEventInput) {
   const session = await requireAdminApiSession();
   if (!env.MONGODB_URI) {
-    throw new Error("Database is required for admin event creation.");
+    throw new AppError("Database is required for admin event creation.", 503, "DB_REQUIRED");
   }
 
   const data = adminEventSchema.parse(input);
@@ -153,7 +161,11 @@ export async function createAdminEvent(input: AdminEventInput) {
   const slug = slugify(data.title);
   const existing = await Event.findOne({ slug });
   if (existing) {
-    throw new Error("An event with a similar title already exists.");
+    throw new AppError(
+      "An event with a similar title already exists.",
+      409,
+      "EVENT_ALREADY_EXISTS",
+    );
   }
 
   const event = await Event.create({
@@ -233,13 +245,13 @@ export async function createAdminEvent(input: AdminEventInput) {
 export async function deleteAdminEvent(id: string) {
   const session = await requireAdminApiSession();
   if (!env.MONGODB_URI) {
-    throw new Error("Database is required for admin event deletion.");
+    throw new AppError("Database is required for admin event deletion.", 503, "DB_REQUIRED");
   }
 
   await connectToDatabase();
   const event = await Event.findById(id);
   if (!event) {
-    throw new Error("Event not found.");
+    throw new AppError("Event not found.", 404, "NOT_FOUND");
   }
 
   const before = event.toObject();
@@ -295,7 +307,7 @@ export async function listAdminPromoCodes() {
 export async function createAdminPromoCode(input: AdminPromoCodeInput) {
   const session = await requireAdminApiSession();
   if (!env.MONGODB_URI) {
-    throw new Error("Database is required for promo code creation.");
+    throw new AppError("Database is required for promo code creation.", 503, "DB_REQUIRED");
   }
 
   const data = adminPromoCodeSchema.parse(input);
@@ -303,7 +315,7 @@ export async function createAdminPromoCode(input: AdminPromoCodeInput) {
 
   const existing = await PromoCode.findOne({ code: data.code });
   if (existing) {
-    throw new Error("Promo code already exists.");
+    throw new AppError("Promo code already exists.", 409, "PROMO_EXISTS");
   }
 
   const promo = await PromoCode.create({
@@ -402,7 +414,7 @@ export async function listStudentVerifications() {
 export async function reviewStudentVerification(id: string, input: StudentReviewInput) {
   const session = await requireAdminApiSession();
   if (!env.MONGODB_URI) {
-    throw new Error("Database is required for verification review.");
+    throw new AppError("Database is required for verification review.", 503, "DB_REQUIRED");
   }
 
   const data = studentReviewSchema.parse(input);
@@ -410,7 +422,7 @@ export async function reviewStudentVerification(id: string, input: StudentReview
 
   const verification = await StudentVerification.findById(id);
   if (!verification) {
-    throw new Error("Verification request not found.");
+    throw new AppError("Verification request not found.", 404, "NOT_FOUND");
   }
 
   verification.status = data.status;
@@ -465,6 +477,51 @@ export async function reviewStudentVerification(id: string, input: StudentReview
   }
 
   return { message: "Verification updated successfully." };
+}
+
+export async function adminDeleteUser(id: string) {
+  const session = await requireAdminApiSession();
+
+  if (!env.MONGODB_URI) {
+    throw new AppError("Database is required for user deletion.", 503, "DB_REQUIRED");
+  }
+
+  await connectToDatabase();
+
+  if (session.sub === id) {
+    throw new AppError("Cannot delete your own account.", 400, "SELF_DELETE_FORBIDDEN");
+  }
+
+  const user = await User.findById(id);
+  if (!user) {
+    throw new AppError("User not found.", 404, "NOT_FOUND");
+  }
+
+  const before = user.toObject();
+  const bookingIds = await Booking.find({ userId: user._id }).distinct("_id");
+
+  await Promise.all([
+    Notification.deleteMany({ userId: user._id }),
+    NotificationLog.deleteMany({ userId: user._id }),
+    ChatMessage.deleteMany({ userId: user._id }),
+    Review.deleteMany({ userId: user._id }),
+    Wishlist.deleteMany({ userId: user._id }),
+    Ticket.deleteMany({ userId: user._id }),
+    Payment.deleteMany({ bookingId: { $in: bookingIds } }),
+    Booking.deleteMany({ userId: user._id }),
+    StudentVerification.deleteMany({ userId: user._id }),
+    User.findByIdAndDelete(id),
+  ]);
+
+  await writeAuditLog({
+    actorUserId: session.sub,
+    action: "DELETE",
+    entityType: "User",
+    entityId: id,
+    before,
+  });
+
+  return { message: "User deleted successfully." };
 }
 
 export async function getSalesReport() {

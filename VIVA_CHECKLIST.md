@@ -16,8 +16,8 @@ npm run db:reset
 ```
 
 This creates:
-- ✅ Admin account: `admin@eventease.demo` / `Password123`
-- ✅ User account: `user@eventease.demo` / `Password123`
+- ✅ Admin account: `admin@gmail.com` / `Password123`
+- ✅ User account: `user@gmail.com` / `Password123`
 - ✅ Sample events with various categories
 - ✅ Sample bookings and tickets
 - ✅ Sample promo codes
@@ -37,7 +37,7 @@ Expected output:
 ### ✅ Quick Test (5 minutes)
 1. [ ] Open http://localhost:3000
 2. [ ] Homepage loads correctly
-3. [ ] Login with `user@eventease.demo` / `Password123`
+3. [ ] Login with `user@gmail.com` / `Password123`
 4. [ ] See notification bell in header
 5. [ ] Browse events page
 6. [ ] View an event details page

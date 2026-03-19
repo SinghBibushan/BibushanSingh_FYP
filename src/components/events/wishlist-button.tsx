@@ -10,6 +10,11 @@ interface WishlistButtonProps {
   size?: "sm" | "md" | "lg";
 }
 
+type WishlistResponse = {
+  error?: string;
+  message?: string;
+};
+
 export function WishlistButton({
   eventId,
   initialSaved = false,
@@ -30,44 +35,43 @@ export function WishlistButton({
     lg: "h-6 w-6",
   };
 
-  const handleToggle = async (e: React.MouseEvent) => {
+  async function readResponse(response: Response) {
+    const data = (await response.json()) as WishlistResponse;
+
+    if (!response.ok) {
+      throw new Error(data.error ?? "Wishlist request failed.");
+    }
+
+    return data;
+  }
+
+  const handleToggle = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-
     setIsLoading(true);
 
     try {
       if (isSaved) {
-        // Remove from wishlist
-        const response = await fetch(`/api/wishlist?eventId=${eventId}`, {
-          method: "DELETE",
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || "Failed to remove from wishlist");
-        }
-
+        await readResponse(
+          await fetch(`/api/wishlist?eventId=${eventId}`, {
+            method: "DELETE",
+          }),
+        );
         setIsSaved(false);
-        toast.success("Removed from wishlist");
+        toast.success("Removed from wishlist.");
       } else {
-        // Add to wishlist
-        const response = await fetch("/api/wishlist", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ eventId }),
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || "Failed to add to wishlist");
-        }
-
+        await readResponse(
+          await fetch("/api/wishlist", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ eventId }),
+          }),
+        );
         setIsSaved(true);
-        toast.success("Added to wishlist ❤️");
+        toast.success("Added to wishlist.");
       }
-    } catch (error: any) {
-      toast.error(error.message || "Something went wrong");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Something went wrong.");
     } finally {
       setIsLoading(false);
     }
@@ -77,14 +81,14 @@ export function WishlistButton({
     <button
       onClick={handleToggle}
       disabled={isLoading}
-      className={`${sizeClasses[size]} rounded-full flex items-center justify-center transition-all duration-300 ${
+      className={`${sizeClasses[size]} flex items-center justify-center rounded-full border transition-all duration-200 ${
         isSaved
-          ? "bg-gradient-to-r from-pink-500 to-rose-500 text-white scale-110"
-          : "bg-muted/50 backdrop-blur-sm text-muted-foreground hover:bg-muted hover:scale-110"
-      } ${isLoading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"} border-2 ${
-        isSaved ? "border-pink-400" : "border-border"
-      }`}
+          ? "border-secondary bg-secondary text-white shadow-[0_12px_24px_rgba(179,115,63,0.22)]"
+          : "border-border bg-white/82 text-muted-foreground shadow-[0_8px_18px_rgba(24,34,53,0.06)] hover:border-primary/20 hover:bg-white hover:text-foreground"
+      } ${isLoading ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
       aria-label={isSaved ? "Remove from wishlist" : "Add to wishlist"}
+      aria-pressed={isSaved}
+      type="button"
     >
       <Heart
         className={`${iconSizes[size]} transition-all duration-300 ${

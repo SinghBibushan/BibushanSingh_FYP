@@ -1,36 +1,38 @@
+import { Calendar, DollarSign, Percent, Ticket, Users } from "lucide-react";
+
 import { AppShell } from "@/components/layout/app-shell";
 import { Card, CardContent } from "@/components/ui/card";
 import { adminNavItems } from "@/lib/admin-nav";
 import { requireAdmin } from "@/lib/auth";
 import { getAdminOverview } from "@/server/admin/service";
-import { Calendar, Users, Ticket, DollarSign } from "lucide-react";
 
-const iconMap: Record<string, any> = {
-  "Total events": Calendar,
-  "Total users": Users,
-  "Total bookings": Ticket,
-  "Revenue": DollarSign,
+type MetricCardStyle = {
+  icon: typeof Calendar;
+  tone: string;
+  surface: string;
 };
 
-const gradientMap: Record<string, string> = {
-  "Total events": "from-blue-500/20 to-cyan-500/20",
-  "Total users": "from-purple-500/20 to-pink-500/20",
-  "Total bookings": "from-green-500/20 to-emerald-500/20",
-  "Revenue": "from-amber-500/20 to-orange-500/20",
-};
-
-const borderMap: Record<string, string> = {
-  "Total events": "border-blue-500/30",
-  "Total users": "border-purple-500/30",
-  "Total bookings": "border-green-500/30",
-  "Revenue": "border-amber-500/30",
-};
-
-const iconColorMap: Record<string, string> = {
-  "Total events": "text-blue-400",
-  "Total users": "text-purple-400",
-  "Total bookings": "text-green-400",
-  "Revenue": "text-amber-400",
+const metricStyleMap: Record<string, MetricCardStyle> = {
+  "Published Events": {
+    icon: Calendar,
+    tone: "text-accent",
+    surface: "bg-[linear-gradient(145deg,#eef5f3_0%,#e7efec_100%)]",
+  },
+  "Promo Codes": {
+    icon: Percent,
+    tone: "text-secondary",
+    surface: "bg-[linear-gradient(145deg,#faf3ea_0%,#f4eadf_100%)]",
+  },
+  Bookings: {
+    icon: Ticket,
+    tone: "text-primary",
+    surface: "bg-[linear-gradient(145deg,#f5f4f0_0%,#ece9e2_100%)]",
+  },
+  "Gross Sales": {
+    icon: DollarSign,
+    tone: "text-secondary",
+    surface: "bg-[linear-gradient(145deg,#faf3ea_0%,#f1e3d1_100%)]",
+  },
 };
 
 export default async function AdminPage() {
@@ -40,44 +42,87 @@ export default async function AdminPage() {
   return (
     <AppShell
       badge="Admin Control Center"
-      title="Operations Dashboard 🚀"
-      description={`Signed in as ${session.name}. Monitor metrics, manage events, and control your platform.`}
+      title="Operations dashboard"
+      description={`Signed in as ${session.name}. Review platform health, revenue, users, and event inventory from a cleaner admin surface.`}
       navItems={adminNavItems}
       currentPath="/admin"
     >
-      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-        {overview.metrics.map((metric, index) => {
-          const Icon = iconMap[metric.label] || Calendar;
-          const gradient = gradientMap[metric.label] || "from-primary/20 to-accent/20";
-          const border = borderMap[metric.label] || "border-primary/30";
-          const iconColor = iconColorMap[metric.label] || "text-primary";
+      <div className="space-y-6">
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+          {overview.metrics.map((metric) => {
+            const style = metricStyleMap[metric.label] ?? {
+              icon: Users,
+              tone: "text-primary",
+              surface: "bg-[linear-gradient(145deg,#f5f4f0_0%,#ece9e2_100%)]",
+            };
+            const Icon = style.icon;
 
-          return (
-            <Card
-              key={metric.label}
-              className={`hover-lift opacity-0 animate-scale-in border-2 ${border}`}
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <CardContent className={`space-y-3 p-6 bg-gradient-to-br ${gradient} relative overflow-hidden`}>
-                <div className="absolute -right-3 -top-3 opacity-5">
-                  <Icon className="h-24 w-24" />
-                </div>
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-xs uppercase tracking-[0.24em] font-semibold text-muted-foreground">
-                      {metric.label}
-                    </p>
-                    <div className={`p-2.5 rounded-xl bg-background/60 border-2 ${border} shadow-sm`}>
-                      <Icon className={`h-5 w-5 ${iconColor}`} />
+            return (
+              <Card key={metric.label} className="hover-lift overflow-hidden bg-white/78">
+                <CardContent className={`space-y-4 ${style.surface}`}>
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                        {metric.label}
+                      </p>
+                      <p className="mt-3 text-3xl font-semibold leading-none text-foreground">
+                        {metric.value}
+                      </p>
+                    </div>
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-border bg-white/82">
+                      <Icon className={`h-5 w-5 ${style.tone}`} />
                     </div>
                   </div>
-                  <p className="text-3xl leading-none font-bold gradient-text mb-3">{metric.value}</p>
-                  <p className="text-sm leading-6 text-muted-foreground">{metric.note}</p>
+                  <p className="text-sm leading-7 text-muted-foreground">{metric.note}</p>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
+          <Card className="bg-white/78">
+            <CardContent className="space-y-4">
+              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-secondary">
+                Control focus
+              </p>
+              <h2 className="text-3xl leading-none">Where the admin workflow is strongest</h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-[22px] border border-border bg-white/82 p-4">
+                  <p className="font-semibold text-foreground">Event management</p>
+                  <p className="mt-2 text-sm leading-7 text-muted-foreground">
+                    Create, review, and remove public listings from a more structured workspace.
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+                <div className="rounded-[22px] border border-border bg-white/82 p-4">
+                  <p className="font-semibold text-foreground">Booking oversight</p>
+                  <p className="mt-2 text-sm leading-7 text-muted-foreground">
+                    Review user activity, sales totals, and booking states from one dashboard.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/78">
+            <CardContent className="space-y-4">
+              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-secondary">
+                Admin posture
+              </p>
+              <h2 className="text-3xl leading-none">Operational summary</h2>
+              <div className="space-y-3">
+                <div className="rounded-[22px] border border-border bg-white/82 p-4 text-sm leading-7 text-muted-foreground">
+                  Published event inventory, promo coverage, booking volume, and gross sales
+                  are now presented with cleaner hierarchy instead of demo-heavy styling.
+                </div>
+                <div className="rounded-[22px] border border-border bg-white/82 p-4 text-sm leading-7 text-muted-foreground">
+                  The rest of the admin screens share the same shell, spacing, and card language
+                  so the workspace feels cohesive rather than assembled piecemeal.
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </AppShell>
   );

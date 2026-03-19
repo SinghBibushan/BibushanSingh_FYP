@@ -20,10 +20,14 @@ function toTicketView(ticket: {
   currency: string;
   quantityTotal: number;
   quantitySold: number;
+  perUserLimit?: number;
+  saleStartsAt?: string;
+  saleEndsAt?: string;
   benefits: string[];
 }): EventTicketView {
   return {
     ...ticket,
+    perUserLimit: ticket.perUserLimit ?? 6,
     quantityRemaining: Math.max(ticket.quantityTotal - ticket.quantitySold, 0),
   };
 }
@@ -143,6 +147,9 @@ async function getDbEventBySlug(slug: string): Promise<EventDetail | null> {
       currency: ticket.currency,
       quantityTotal: ticket.quantityTotal,
       quantitySold: ticket.quantitySold,
+      perUserLimit: ticket.perUserLimit,
+      saleStartsAt: new Date(ticket.saleStartsAt).toISOString(),
+      saleEndsAt: new Date(ticket.saleEndsAt).toISOString(),
       benefits: ticket.benefits ?? [],
     }),
   );

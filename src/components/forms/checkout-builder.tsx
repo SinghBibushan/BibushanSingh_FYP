@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -17,10 +18,12 @@ export function CheckoutBuilder({
   event,
   loyaltyPoints,
   studentVerified,
+  paymentMode,
 }: {
   event: EventDetail;
   loyaltyPoints: number;
   studentVerified: boolean;
+  paymentMode: "MOCK" | "PAYPAL" | "NONE";
 }) {
   const router = useRouter();
   const [quantities, setQuantities] = useState<Record<string, number>>(
@@ -41,6 +44,18 @@ export function CheckoutBuilder({
       })),
     [event.ticketTypes, quantities],
   );
+
+  const totalSelected = useMemo(
+    () => selections.reduce((sum, selection) => sum + selection.quantity, 0),
+    [selections],
+  );
+
+  function setQuantity(ticketId: string, value: number, max: number) {
+    setQuantities((current) => ({
+      ...current,
+      [ticketId]: Math.max(0, Math.min(value, max)),
+    }));
+  }
 
   async function handleQuote() {
     setIsQuoting(true);
@@ -101,54 +116,89 @@ export function CheckoutBuilder({
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-      <Card>
-        <CardContent className="space-y-6 p-6">
-          <div className="space-y-2">
-            <h2 className="text-3xl leading-none">Select tickets</h2>
+      <Card className="bg-white/78">
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
+            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-secondary">
+              Ticket selection
+            </p>
+            <h2 className="text-3xl leading-none">Configure your order</h2>
             <p className="text-sm leading-7 text-muted-foreground">
-              Configure quantities and discount options. Final validation still
-              happens on the server before a booking is created.
+              Select quantities, apply promo or student pricing where eligible, and
+              request a verified server-side quote before creating the booking.
             </p>
           </div>
 
           <div className="space-y-4">
-            {event.ticketTypes.map((ticket) => (
-              <div
-                key={ticket.id}
-                className="grid gap-4 rounded-[24px] border border-border bg-card p-4 md:grid-cols-[1fr_110px]"
-              >
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-lg font-semibold">{ticket.name}</p>
-                    <p className="font-semibold text-primary">
-                      {formatCurrency(ticket.price, ticket.currency)}
-                    </p>
+            {event.ticketTypes.map((ticket) => {
+              const maxQuantity = Math.min(ticket.quantityRemaining, ticket.perUserLimit);
+              const quantity = quantities[ticket.id] ?? 0;
+
+              return (
+                <div
+                  key={ticket.id}
+                  className="grid gap-4 rounded-[24px] border border-border bg-white/82 p-4 md:grid-cols-[1fr_170px]"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-lg font-semibold text-foreground">{ticket.name}</p>
+                        <p className="text-sm text-muted-foreground">{ticket.description}</p>
+                      </div>
+                      <p className="font-semibold text-secondary">
+                        {formatCurrency(ticket.price, ticket.currency)}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="rounded-full border border-border bg-white px-3 py-1 text-xs font-semibold text-muted-foreground">
+                        {ticket.quantityRemaining} seats remaining
+                      </span>
+                      <span className="rounded-full border border-border bg-white px-3 py-1 text-xs font-semibold text-muted-foreground">
+                        Limit {ticket.perUserLimit} per booking
+                      </span>
+                      {ticket.benefits.slice(0, 2).map((benefit) => (
+                        <span
+                          key={benefit}
+                          className="rounded-full border border-border bg-white px-3 py-1 text-xs font-semibold text-muted-foreground"
+                        >
+                          {benefit}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                  <p className="text-sm leading-7 text-muted-foreground">
-                    {ticket.description}
-                  </p>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                    {ticket.quantityRemaining} seats remaining
-                  </p>
+                  <div className="space-y-2">
+                    <Label htmlFor={`qty-${ticket.id}`}>Quantity</Label>
+                    <div className="flex items-center gap-2 rounded-2xl border border-border bg-white p-2">
+                      <button
+                        type="button"
+                        onClick={() => setQuantity(ticket.id, quantity - 1, maxQuantity)}
+                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-white text-foreground"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <Input
+                        id={`qty-${ticket.id}`}
+                        type="number"
+                        min={0}
+                        max={maxQuantity}
+                        value={quantity}
+                        onChange={(eventValue) =>
+                          setQuantity(ticket.id, Number(eventValue.target.value), maxQuantity)
+                        }
+                        className="border-0 bg-transparent text-center shadow-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setQuantity(ticket.id, quantity + 1, maxQuantity)}
+                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-white text-foreground"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor={`qty-${ticket.id}`}>Quantity</Label>
-                  <Input
-                    id={`qty-${ticket.id}`}
-                    type="number"
-                    min={0}
-                    max={Math.min(ticket.quantityRemaining, 10)}
-                    value={quantities[ticket.id] ?? 0}
-                    onChange={(eventValue) =>
-                      setQuantities((current) => ({
-                        ...current,
-                        [ticket.id]: Number(eventValue.target.value),
-                      }))
-                    }
-                  />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -170,7 +220,9 @@ export function CheckoutBuilder({
                 max={loyaltyPoints}
                 value={loyaltyPointsToRedeem}
                 onChange={(eventValue) =>
-                  setLoyaltyPointsToRedeem(Number(eventValue.target.value))
+                  setLoyaltyPointsToRedeem(
+                    Math.max(0, Math.min(Number(eventValue.target.value), loyaltyPoints)),
+                  )
                 }
               />
               <p className="text-xs text-muted-foreground">
@@ -179,40 +231,66 @@ export function CheckoutBuilder({
             </div>
           </div>
 
-          <label className="flex items-start gap-3 rounded-2xl bg-muted p-4 text-sm">
+          <label
+            className={`flex items-start gap-3 rounded-[24px] border p-4 text-sm ${
+              studentVerified
+                ? "border-border bg-[linear-gradient(145deg,#eef5f3_0%,#e7efec_100%)]"
+                : "border-border bg-white/82"
+            }`}
+          >
             <input
               type="checkbox"
               checked={useStudentDiscount}
               onChange={(eventValue) => setUseStudentDiscount(eventValue.target.checked)}
               className="mt-1 h-4 w-4"
+              disabled={!studentVerified}
             />
             <span className="leading-7 text-muted-foreground">
               Apply student discount
               <span className="block text-xs">
                 {studentVerified
                   ? "Your account is approved for student pricing."
-                  : "Your account needs approved student verification before this can apply."}
+                  : "Student pricing is unavailable until verification is approved."}
               </span>
             </span>
           </label>
         </CardContent>
       </Card>
 
-      <Card className="h-fit lg:sticky lg:top-28">
-        <CardContent className="space-y-6 p-6">
-          <div className="space-y-2">
-            <h2 className="text-3xl leading-none">Order summary</h2>
+      <Card className="h-fit bg-white/78 lg:sticky lg:top-28">
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
+            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-secondary">
+              Order summary
+            </p>
+            <h2 className="text-3xl leading-none">Review before booking</h2>
             <p className="text-sm leading-7 text-muted-foreground">
-              Quote first to inspect the final price breakdown, then create a booking
-              and complete the mock payment on the next screen.
+              Quote first to inspect the final price breakdown, then create a booking and
+              {paymentMode === "PAYPAL"
+                ? " complete the PayPal payment on the next screen."
+                : paymentMode === "MOCK"
+                  ? " complete mock payment on the next screen."
+                  : " finish payment after a provider is configured."}
+            </p>
+          </div>
+
+          <div className="rounded-[24px] border border-border bg-white/82 p-4">
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              Tickets selected
+            </p>
+            <p className="mt-2 text-3xl font-semibold leading-none text-foreground">
+              {totalSelected}
             </p>
           </div>
 
           {quote ? (
-            <div className="space-y-4 rounded-[24px] bg-muted p-5">
+            <div className="space-y-4 rounded-[24px] border border-border bg-[linear-gradient(145deg,#f8f3ea_0%,#f2e5d6_100%)] p-5">
               <div className="space-y-2">
                 {quote.selections.map((selection) => (
-                  <div key={selection.ticketTypeId} className="flex items-center justify-between text-sm">
+                  <div
+                    key={selection.ticketTypeId}
+                    className="flex items-center justify-between text-sm"
+                  >
                     <span>
                       {selection.name} x {selection.quantity}
                     </span>
@@ -227,13 +305,16 @@ export function CheckoutBuilder({
               </div>
 
               {quote.discounts.map((discount) => (
-                <div key={discount.label} className="flex items-center justify-between text-sm text-emerald-700">
+                <div
+                  key={discount.label}
+                  className="flex items-center justify-between text-sm text-emerald-700"
+                >
                   <span>{discount.label}</span>
                   <span>-{formatCurrency(discount.amount, quote.currency)}</span>
                 </div>
               ))}
 
-              <div className="flex items-center justify-between text-base font-semibold">
+              <div className="flex items-center justify-between text-base font-semibold text-foreground">
                 <span>Total</span>
                 <span>{formatCurrency(quote.finalAmount, quote.currency)}</span>
               </div>
@@ -256,9 +337,15 @@ export function CheckoutBuilder({
             <Button
               variant="secondary"
               onClick={handleCreateBooking}
-              disabled={isCreating}
+              disabled={isCreating || totalSelected === 0 || paymentMode === "NONE"}
             >
-              {isCreating ? "Creating booking..." : "Proceed to mock payment"}
+              {isCreating
+                ? "Creating booking..."
+                : paymentMode === "PAYPAL"
+                  ? "Proceed to PayPal checkout"
+                  : paymentMode === "MOCK"
+                    ? "Proceed to mock payment"
+                    : "Payment unavailable"}
             </Button>
           </div>
         </CardContent>

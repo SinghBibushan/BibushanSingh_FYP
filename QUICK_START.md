@@ -17,13 +17,13 @@ http://localhost:3000
 
 **Admin Account:**
 ```
-Email: admin@eventease.demo
+Email: admin@gmail.com
 Password: Password123
 ```
 
 **User Account:**
 ```
-Email: user@eventease.demo
+Email: user@gmail.com
 Password: Password123
 ```
 

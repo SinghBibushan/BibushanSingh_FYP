@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Star, ThumbsUp } from "lucide-react";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
 
@@ -39,21 +40,35 @@ export function ReviewsDisplay({ eventId }: ReviewsDisplayProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchReviews();
-  }, [eventId]);
+    let active = true;
 
-  const fetchReviews = async () => {
-    try {
-      const response = await fetch(`/api/reviews?eventId=${eventId}`);
-      const data = await response.json();
-      setReviews(data.reviews || []);
-      setStats(data.stats || null);
-    } catch (error) {
-      console.error("Failed to fetch reviews:", error);
-    } finally {
-      setLoading(false);
+    async function fetchReviews() {
+      try {
+        const response = await fetch(`/api/reviews?eventId=${eventId}`);
+        const data = (await response.json()) as {
+          reviews?: Review[];
+          stats?: ReviewStats | null;
+        };
+
+        if (!active) {
+          return;
+        }
+
+        setReviews(data.reviews ?? []);
+        setStats(data.stats ?? null);
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
     }
-  };
+
+    void fetchReviews();
+
+    return () => {
+      active = false;
+    };
+  }, [eventId]);
 
   const renderStars = (rating: number, size: "sm" | "md" = "md") => {
     const sizeClass = size === "sm" ? "h-4 w-4" : "h-5 w-5";
@@ -63,9 +78,7 @@ export function ReviewsDisplay({ eventId }: ReviewsDisplayProps) {
           <Star
             key={star}
             className={`${sizeClass} ${
-              star <= rating
-                ? "fill-amber-400 text-amber-400"
-                : "text-muted-foreground/30"
+              star <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"
             }`}
           />
         ))}
@@ -76,8 +89,8 @@ export function ReviewsDisplay({ eventId }: ReviewsDisplayProps) {
   if (loading) {
     return (
       <div className="space-y-4">
-        <div className="h-32 rounded-2xl bg-muted/50 animate-pulse" />
-        <div className="h-48 rounded-2xl bg-muted/50 animate-pulse" />
+        <div className="h-32 animate-pulse rounded-2xl bg-muted/50" />
+        <div className="h-48 animate-pulse rounded-2xl bg-muted/50" />
       </div>
     );
   }
@@ -86,10 +99,10 @@ export function ReviewsDisplay({ eventId }: ReviewsDisplayProps) {
     return (
       <Card className="border-2 border-dashed border-primary/30">
         <CardContent className="py-12 text-center">
-          <Star className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No reviews yet</h3>
-          <p className="text-muted-foreground text-sm">
-            Be the first to review this event after attending!
+          <Star className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+          <h3 className="mb-2 text-lg font-semibold">No reviews yet</h3>
+          <p className="text-sm text-muted-foreground">
+            Be the first to review this event after attending.
           </p>
         </CardContent>
       </Card>
@@ -98,16 +111,15 @@ export function ReviewsDisplay({ eventId }: ReviewsDisplayProps) {
 
   return (
     <div className="space-y-6">
-      {/* Rating Summary */}
       <Card className="border-primary/30">
         <CardContent className="p-6">
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid gap-6 md:grid-cols-2">
             <div className="flex flex-col items-center justify-center text-center">
-              <div className="text-5xl font-bold gradient-text mb-2">
+              <div className="mb-2 text-5xl font-bold gradient-text">
                 {stats.averageRating.toFixed(1)}
               </div>
               {renderStars(Math.round(stats.averageRating))}
-              <p className="text-sm text-muted-foreground mt-2">
+              <p className="mt-2 text-sm text-muted-foreground">
                 Based on {stats.totalReviews} {stats.totalReviews === 1 ? "review" : "reviews"}
               </p>
             </div>
@@ -115,17 +127,19 @@ export function ReviewsDisplay({ eventId }: ReviewsDisplayProps) {
             <div className="space-y-2">
               {[5, 4, 3, 2, 1].map((rating) => {
                 const count = stats.distribution[rating as keyof typeof stats.distribution];
-                const percentage = stats.totalReviews > 0 ? (count / stats.totalReviews) * 100 : 0;
+                const percentage =
+                  stats.totalReviews > 0 ? (count / stats.totalReviews) * 100 : 0;
+
                 return (
                   <div key={rating} className="flex items-center gap-3">
-                    <span className="text-sm font-medium w-8">{rating}★</span>
-                    <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                    <span className="w-8 text-sm font-medium">{rating}★</span>
+                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
                       <div
                         className="h-full bg-gradient-to-r from-amber-400 to-orange-400 transition-all duration-500"
                         style={{ width: `${percentage}%` }}
                       />
                     </div>
-                    <span className="text-sm text-muted-foreground w-12 text-right">
+                    <span className="w-12 text-right text-sm text-muted-foreground">
                       {count}
                     </span>
                   </div>
@@ -136,19 +150,18 @@ export function ReviewsDisplay({ eventId }: ReviewsDisplayProps) {
         </CardContent>
       </Card>
 
-      {/* Reviews List */}
       <div className="space-y-4">
         {reviews.map((review, index) => (
           <Card
             key={review._id}
-            className="opacity-0 animate-fade-in hover-lift border-primary/20"
+            className="hover-lift border-primary/20 opacity-0 animate-fade-in"
             style={{ animationDelay: `${index * 0.1}s` }}
           >
-            <CardContent className="p-6 space-y-4">
+            <CardContent className="space-y-4 p-6">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary font-bold text-white">
                       {review.userId.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
@@ -163,14 +176,14 @@ export function ReviewsDisplay({ eventId }: ReviewsDisplayProps) {
               </div>
 
               <div>
-                <h4 className="font-semibold mb-2">{review.title}</h4>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <h4 className="mb-2 font-semibold">{review.title}</h4>
+                <p className="text-sm leading-relaxed text-muted-foreground">
                   {review.comment}
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 pt-2 border-t border-border/50">
-                <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+              <div className="flex items-center gap-2 border-t border-border/50 pt-2">
+                <button className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary">
                   <ThumbsUp className="h-4 w-4" />
                   <span>Helpful ({review.helpfulCount})</span>
                 </button>

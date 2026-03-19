@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SeatSelector } from "@/components/seats/seat-selector";
 import { EventReviews } from "@/components/reviews/event-reviews";
@@ -26,8 +25,6 @@ interface EventDetailsProps {
 }
 
 export function EventDetailsWithFeatures({ event, userBooking }: EventDetailsProps) {
-  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
-
   return (
     <div className="space-y-8">
       {/* Weather Widget for Outdoor Events */}
@@ -41,7 +38,7 @@ export function EventDetailsWithFeatures({ event, userBooking }: EventDetailsPro
           <h2 className="text-2xl font-bold mb-4">Select Your Seats</h2>
           <SeatSelector
             eventId={event._id}
-            onSeatsSelected={(seats) => setSelectedSeats(seats)}
+            onSeatsSelected={() => undefined}
           />
         </div>
       )}

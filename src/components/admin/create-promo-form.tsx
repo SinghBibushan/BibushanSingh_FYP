@@ -10,6 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { readJson } from "@/lib/api";
 
+const selectClassName =
+  "flex h-12 w-full rounded-2xl border border-border bg-white/70 px-4 text-sm text-foreground outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] focus-visible:ring-2 focus-visible:ring-ring";
+
 export function CreatePromoForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -64,13 +67,16 @@ export function CreatePromoForm() {
   }
 
   return (
-    <Card>
-      <CardContent className="p-6">
+    <Card className="bg-white/78">
+      <CardContent>
         <form className="grid gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
-          <div className="space-y-2 md:col-span-2">
-            <h2 className="text-3xl leading-none">Create promo code</h2>
-            <p className="text-sm text-muted-foreground">
-              Admin-facing promo creation for discount demonstrations.
+          <div className="space-y-3 md:col-span-2">
+            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-secondary">
+              Create promo code
+            </p>
+            <h2 className="text-3xl leading-none">Launch a discount rule</h2>
+            <p className="text-sm leading-7 text-muted-foreground">
+              Admin-facing promo creation for discount and checkout demonstrations.
             </p>
           </div>
           <div className="space-y-2">
@@ -84,7 +90,7 @@ export function CreatePromoForm() {
           <div className="space-y-2">
             <Label>Type</Label>
             <select
-              className="flex h-12 w-full rounded-2xl border border-border bg-white px-4 text-sm"
+              className={selectClassName}
               value={form.discountType}
               onChange={(e) => update("discountType", e.target.value)}
             >

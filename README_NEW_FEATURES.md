@@ -127,7 +127,7 @@ npm run dev
 ### Access:
 - **URL:** http://localhost:3000 (or 3002 if 3000 is in use)
 - **User Login:** `user@eventease.demo` / `Password123`
-- **Admin Login:** `admin@eventease.demo` / `Password123`
+- **Admin Login:** `admin@gmail.com` / `Password123`
 
 ### Test New Features:
 1. **Notifications:** Login and check bell icon in header
@@ -277,7 +277,7 @@ Your EventEase platform is now a complete, professional-grade event management s
 
 ### Login Credentials:
 - **User:** `user@eventease.demo` / `Password123`
-- **Admin:** `admin@eventease.demo` / `Password123`
+- **Admin:** `admin@gmail.com` / `Password123`
 
 ### Important Commands:
 ```bash

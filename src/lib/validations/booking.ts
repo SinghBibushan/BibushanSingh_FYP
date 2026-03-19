@@ -20,6 +20,17 @@ export const mockPaymentConfirmSchema = z.object({
   outcome: z.enum(["success", "failed"]),
 });
 
+export const paypalOrderSchema = z.object({
+  bookingCode: z.string().min(1),
+});
+
+export const paypalCaptureSchema = z.object({
+  bookingCode: z.string().min(1),
+  orderId: z.string().min(1),
+});
+
 export type BookingQuoteInput = z.infer<typeof bookingQuoteSchema>;
 export type CreateBookingInput = z.infer<typeof createBookingSchema>;
 export type MockPaymentConfirmInput = z.infer<typeof mockPaymentConfirmSchema>;
+export type PayPalOrderInput = z.infer<typeof paypalOrderSchema>;
+export type PayPalCaptureInput = z.infer<typeof paypalCaptureSchema>;

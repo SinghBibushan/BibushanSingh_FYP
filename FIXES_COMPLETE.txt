@@ -125,7 +125,7 @@ Production Ready:       ✅ YES
    → Click a notification to mark as read
 
 4. TEST USER MANAGEMENT (ADMIN ONLY)
-   → Login as admin (admin@eventease.demo / Password123)
+   → Login as admin (admin@gmail.com / Password123)
    → Go to http://localhost:3000/admin/users
    → You'll see all users with action buttons
    → Try "Make Admin" on a user

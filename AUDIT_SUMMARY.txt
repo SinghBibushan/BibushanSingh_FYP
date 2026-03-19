@@ -171,7 +171,7 @@ Features:
    http://localhost:3000
 
 3. Login:
-   Admin: admin@eventease.demo / Password123
+   Admin: admin@gmail.com / Password123
    User: user@eventease.demo / Password123
 
 4. Test Features:

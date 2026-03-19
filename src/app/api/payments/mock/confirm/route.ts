@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { getErrorMessage, getErrorStatus } from "@/lib/errors";
 import { confirmMockPayment } from "@/server/bookings/service";
 
 export async function POST(request: Request) {
@@ -8,9 +9,8 @@ export async function POST(request: Request) {
     const result = await confirmMockPayment(body);
     return NextResponse.json(result);
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Could not confirm mock payment.";
-    const status = message === "Unauthorized." ? 401 : 400;
+    const message = getErrorMessage(error, "Could not confirm mock payment.");
+    const status = getErrorStatus(error, 400);
     return NextResponse.json({ message }, { status });
   }
 }

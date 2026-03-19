@@ -10,7 +10,10 @@ type MailPayload = {
 };
 
 export async function sendEmail(payload: MailPayload) {
-  if (isMockEmailEnabled || !env.SMTP_HOST || !env.SMTP_PORT) {
+  if (
+    isMockEmailEnabled ||
+    (!env.SMTP_SERVICE && (!env.SMTP_HOST || !env.SMTP_PORT))
+  ) {
     console.log("[mock-email]", {
       to: payload.to,
       subject: payload.subject,
@@ -20,8 +23,9 @@ export async function sendEmail(payload: MailPayload) {
   }
 
   const transporter = nodemailer.createTransport({
-    host: env.SMTP_HOST,
-    port: Number(env.SMTP_PORT),
+    ...(env.SMTP_SERVICE ? { service: env.SMTP_SERVICE } : {}),
+    ...(env.SMTP_HOST ? { host: env.SMTP_HOST } : {}),
+    ...(env.SMTP_PORT ? { port: Number(env.SMTP_PORT) } : {}),
     secure: Number(env.SMTP_PORT) === 465,
     auth:
       env.SMTP_USER && env.SMTP_PASS

@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "test": "tsc -p tsconfig.tests.json && node --test --test-concurrency=1 --test-isolation=none .test-dist/tests/rate-limit.test.js .test-dist/tests/booking-pricing.test.js",
     "db:seed": "tsx scripts/seed.ts",
     "db:reset": "tsx scripts/reset-and-seed.ts",
     "reminders:send": "tsx scripts/send-event-reminders.ts",

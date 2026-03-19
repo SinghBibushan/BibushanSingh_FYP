@@ -7,7 +7,8 @@ import {
   verifyActionToken,
 } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db";
-import { env } from "@/lib/env";
+import { env, isGoogleAuthEnabled, isMockEmailEnabled } from "@/lib/env";
+import { AppError } from "@/lib/errors";
 import {
   forgotPasswordSchema,
   loginSchema,
@@ -20,6 +21,18 @@ import {
 } from "@/lib/validations/auth";
 import { User } from "@/models/User";
 import { sendEmail } from "@/server/notifications/mailer";
+
+type GoogleTokenInfo = {
+  aud: string;
+  email: string;
+  email_verified: string;
+  exp: string;
+  given_name?: string;
+  iss: string;
+  name?: string;
+  picture?: string;
+  sub: string;
+};
 
 function makeUrl(path: string) {
   return new URL(path, env.APP_URL).toString();
@@ -50,6 +63,68 @@ function buildAuthEmail({
   `;
 
   return { text, html };
+}
+
+function buildAuthUserResponse(user: {
+  _id: unknown;
+  name: string;
+  email: string;
+  role: "USER" | "ADMIN";
+  emailVerifiedAt?: Date | null;
+  avatarUrl?: string;
+}) {
+  return {
+    id: String(user._id),
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    emailVerified: Boolean(user.emailVerifiedAt),
+    avatarUrl: user.avatarUrl ?? "",
+  };
+}
+
+async function verifyGoogleCredential(credential: string) {
+  if (!isGoogleAuthEnabled || !env.GOOGLE_CLIENT_ID) {
+    throw new AppError("Google sign-in is not configured.", 501, "NOT_IMPLEMENTED");
+  }
+
+  const response = await fetch(
+    `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`,
+    {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    throw new AppError("Invalid Google credential.", 401, "UNAUTHORIZED");
+  }
+
+  const tokenInfo = (await response.json()) as GoogleTokenInfo;
+  const issuerIsValid =
+    tokenInfo.iss === "accounts.google.com" ||
+    tokenInfo.iss === "https://accounts.google.com";
+  const isExpired = Number(tokenInfo.exp) * 1000 <= Date.now();
+
+  if (
+    !tokenInfo.email ||
+    tokenInfo.email_verified !== "true" ||
+    tokenInfo.aud !== env.GOOGLE_CLIENT_ID ||
+    !issuerIsValid ||
+    isExpired
+  ) {
+    throw new AppError("Google credential validation failed.", 401, "UNAUTHORIZED");
+  }
+
+  return {
+    email: tokenInfo.email.toLowerCase(),
+    name: tokenInfo.name?.trim() || tokenInfo.given_name?.trim() || "Google User",
+    picture: tokenInfo.picture ?? "",
+    googleId: tokenInfo.sub,
+  };
 }
 
 export async function registerUser(input: RegisterInput) {
@@ -98,14 +173,8 @@ export async function registerUser(input: RegisterInput) {
 
   return {
     message: "Registration successful. Check your email verification link.",
-    verifyUrl,
-    user: {
-      id: String(user._id),
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      emailVerified: Boolean(user.emailVerifiedAt),
-    },
+    verifyUrl: isMockEmailEnabled ? verifyUrl : undefined,
+    user: buildAuthUserResponse(user),
   };
 }
 
@@ -137,13 +206,7 @@ export async function loginUser(input: LoginInput) {
 
   return {
     message: "Login successful.",
-    user: {
-      id: String(user._id),
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      emailVerified: Boolean(user.emailVerifiedAt),
-    },
+    user: buildAuthUserResponse(user),
   };
 }
 
@@ -185,7 +248,7 @@ export async function requestPasswordReset(input: ForgotPasswordInput) {
 
   return {
     message: "If the email exists, a password reset link has been prepared.",
-    resetUrl,
+    resetUrl: isMockEmailEnabled ? resetUrl : undefined,
   };
 }
 
@@ -237,4 +300,45 @@ export async function verifyEmailAddress(token: string) {
   });
 
   return { message: "Email verified successfully." };
+}
+
+export async function authenticateWithGoogle(credential: string) {
+  const googleProfile = await verifyGoogleCredential(credential);
+  await connectToDatabase();
+
+  let user = await User.findOne({ email: googleProfile.email });
+
+  if (!user) {
+    user = await User.create({
+      name: googleProfile.name,
+      email: googleProfile.email,
+      googleId: googleProfile.googleId,
+      authProvider: "GOOGLE",
+      avatarUrl: googleProfile.picture,
+      emailVerifiedAt: new Date(),
+      passwordHash: "",
+      role: "USER",
+    });
+  } else {
+    user.googleId = googleProfile.googleId;
+    user.authProvider = "GOOGLE";
+    user.avatarUrl = googleProfile.picture || user.avatarUrl;
+    user.emailVerifiedAt = user.emailVerifiedAt ?? new Date();
+    await user.save();
+  }
+
+  user.lastLoginAt = new Date();
+  await user.save();
+
+  await setSessionCookie({
+    sub: String(user._id),
+    email: user.email,
+    role: user.role,
+    name: user.name,
+  });
+
+  return {
+    message: "Google sign-in successful.",
+    user: buildAuthUserResponse(user),
+  };
 }

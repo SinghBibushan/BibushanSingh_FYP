@@ -44,7 +44,7 @@ Once the page loads, try these:
 
 3. **Login**
    http://localhost:3000/login
-   - Admin: admin@eventease.demo / Password123
+   - Admin: admin@gmail.com / Password123
    - User: user@eventease.demo / Password123
 
 4. **Admin Panel** (test user management)

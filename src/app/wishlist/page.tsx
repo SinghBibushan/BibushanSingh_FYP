@@ -1,12 +1,30 @@
+import Link from "next/link";
+import { ArrowRight, Calendar, Heart, MapPin } from "lucide-react";
+
 import { AppShell } from "@/components/layout/app-shell";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { requireUser } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
-import { Wishlist } from "@/models/Wishlist";
-import { Card, CardContent } from "@/components/ui/card";
-import Link from "next/link";
-import { Heart, Calendar, MapPin, ArrowRight } from "lucide-react";
 import { formatDate } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
+import { Wishlist } from "@/models/Wishlist";
+
+type WishlistEvent = {
+  _id: string;
+  title: string;
+  slug: string;
+  summary: string;
+  category: string;
+  city: string;
+  venueName: string;
+  startsAt: string | Date;
+  tags?: string[];
+};
+
+type WishlistRecord = {
+  createdAt: Date;
+  eventId: WishlistEvent | null;
+};
 
 const userNavItems = [
   { href: "/dashboard", label: "Overview" },
@@ -21,109 +39,119 @@ export default async function WishlistPage() {
 
   await connectDB();
 
-  const wishlistItems = await Wishlist.find({ userId: user.sub })
+  const wishlistItems = (await Wishlist.find({ userId: user.sub })
     .populate({
       path: "eventId",
       select: "title slug summary category city venueName startsAt tags",
     })
     .sort({ createdAt: -1 })
-    .lean();
+    .lean()) as WishlistRecord[];
 
   const events = wishlistItems
-    .filter((item: any) => item.eventId)
-    .map((item: any) => ({
-      ...item.eventId,
-      savedAt: item.createdAt,
+    .filter((item) => item.eventId)
+    .map((item) => ({
+      ...(item.eventId as WishlistEvent),
+      savedAt: item.createdAt.toISOString(),
     }));
 
   return (
     <AppShell
       badge="My Wishlist"
-      title="Saved Events ❤️"
-      description="Events you've saved for later. Book tickets before they sell out!"
+      title="Saved events"
+      description="A calmer planning space for events you want to revisit before committing to checkout."
       navItems={userNavItems}
       currentPath="/wishlist"
     >
       {events.length === 0 ? (
-        <Card className="border-2 border-dashed border-primary/30">
+        <Card className="bg-white/78">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 p-6 mb-6">
-              <Heart className="h-12 w-12 text-primary" />
+            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-border bg-white">
+              <Heart className="h-10 w-10 text-secondary" />
             </div>
-            <h3 className="text-2xl font-bold mb-2">No saved events yet</h3>
-            <p className="text-muted-foreground mb-6 max-w-md">
-              Start exploring events and save your favorites by clicking the heart icon.
+            <h3 className="mb-2 text-3xl font-semibold leading-none text-foreground">
+              No saved events yet
+            </h3>
+            <p className="mb-6 max-w-md text-sm leading-7 text-muted-foreground">
+              Save events from the catalogue to build a shortlist before booking.
             </p>
             <Link
               href="/events"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-primary to-secondary text-white font-semibold hover:scale-105 transition-transform duration-300"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground shadow-[0_14px_30px_rgba(24,34,53,0.16)]"
             >
-              Browse Events
+              Browse events
               <ArrowRight className="h-4 w-4" />
             </Link>
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <p className="text-muted-foreground">
-              {events.length} {events.length === 1 ? "event" : "events"} saved
+        <div className="space-y-5">
+          <div className="flex items-center justify-between rounded-[28px] border border-border bg-white/72 px-6 py-4">
+            <div>
+              <p className="text-[0.72rem] uppercase tracking-[0.22em] text-muted-foreground">
+                Saved collection
+              </p>
+              <p className="mt-2 text-3xl font-semibold leading-none text-foreground">
+                {events.length} {events.length === 1 ? "event" : "events"}
+              </p>
+            </div>
+            <p className="max-w-sm text-right text-sm leading-6 text-muted-foreground">
+              Keep track of strong candidates before moving into ticket selection.
             </p>
           </div>
 
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {events.map((event: any, index: number) => (
+            {events.map((event, index) => (
               <Card
-                key={event._id.toString()}
-                className="hover-lift opacity-0 animate-scale-in border-primary/20 hover:border-primary/50"
-                style={{ animationDelay: `${index * 0.1}s` }}
+                key={event._id}
+                className="hover-lift overflow-hidden bg-white/78 opacity-0 animate-scale-in"
+                style={{ animationDelay: `${index * 0.08}s` }}
               >
-                <CardContent className="p-6 space-y-4">
+                <CardContent className="space-y-5">
                   <div className="flex items-start justify-between">
-                    <Badge className="bg-gradient-to-r from-primary to-secondary text-white border-0">
-                      {event.category}
-                    </Badge>
-                    <div className="rounded-full bg-gradient-to-r from-pink-500 to-rose-500 p-2">
-                      <Heart className="h-4 w-4 text-white fill-current" />
+                    <Badge>{event.category}</Badge>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-secondary">
+                      <Heart className="h-4 w-4 fill-current" />
                     </div>
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-bold mb-2 line-clamp-2">
+                    <h3 className="mb-2 line-clamp-2 text-2xl font-semibold leading-tight">
                       {event.title}
                     </h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2">
+                    <p className="line-clamp-2 text-sm leading-7 text-muted-foreground">
                       {event.summary}
                     </p>
                   </div>
 
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Calendar className="h-4 w-4 text-primary" />
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center gap-3 text-muted-foreground">
+                      <Calendar className="h-4 w-4 text-secondary" />
                       <span>{formatDate(event.startsAt)}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <MapPin className="h-4 w-4 text-secondary" />
-                      <span>{event.venueName}, {event.city}</span>
+                    <div className="flex items-center gap-3 text-muted-foreground">
+                      <MapPin className="h-4 w-4 text-accent" />
+                      <span>
+                        {event.venueName}, {event.city}
+                      </span>
                     </div>
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    {event.tags?.slice(0, 2).map((tag: string) => (
+                    {event.tags?.slice(0, 2).map((tag) => (
                       <span
                         key={tag}
-                        className="text-xs px-2 py-1 rounded-full bg-muted/50 text-muted-foreground"
+                        className="rounded-full border border-border bg-white px-3 py-1 text-xs font-semibold text-muted-foreground"
                       >
-                        #{tag}
+                        {tag}
                       </span>
                     ))}
                   </div>
 
                   <Link
                     href={`/events/${event.slug}`}
-                    className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-secondary transition-colors"
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-primary"
                   >
-                    View Event
+                    View event
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </CardContent>

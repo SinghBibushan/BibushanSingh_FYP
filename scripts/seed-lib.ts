@@ -18,15 +18,19 @@ loadEnvFile();
 
 export const DEMO_ADMIN = {
   name: "EventEase Admin",
-  email: "admin@eventease.demo",
+  email: "admin@gmail.com",
   password: "Password123",
 };
 
+const LEGACY_DEMO_ADMIN_EMAIL = "admin@eventease.demo";
+
 export const DEMO_USER = {
   name: "Demo User",
-  email: "user@eventease.demo",
+  email: "user@gmail.com",
   password: "Password123",
 };
+
+const LEGACY_DEMO_USER_EMAIL = "user@eventease.demo";
 
 export async function connectScriptDatabase() {
   const mongoUri = process.env.MONGODB_URI;
@@ -59,7 +63,9 @@ async function seedUsers() {
   const userPasswordHash = await bcrypt.hash(DEMO_USER.password, 10);
 
   const admin = await User.findOneAndUpdate(
-    { email: DEMO_ADMIN.email },
+    {
+      $or: [{ email: DEMO_ADMIN.email }, { email: LEGACY_DEMO_ADMIN_EMAIL }],
+    },
     {
       name: DEMO_ADMIN.name,
       email: DEMO_ADMIN.email,
@@ -74,7 +80,9 @@ async function seedUsers() {
   );
 
   const user = await User.findOneAndUpdate(
-    { email: DEMO_USER.email },
+    {
+      $or: [{ email: DEMO_USER.email }, { email: LEGACY_DEMO_USER_EMAIL }],
+    },
     {
       name: DEMO_USER.name,
       email: DEMO_USER.email,

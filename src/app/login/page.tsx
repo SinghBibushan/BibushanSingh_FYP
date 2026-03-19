@@ -19,8 +19,8 @@ export default async function LoginPage() {
         <div className="opacity-0 animate-slide-in-left">
           <AuthPanel
             eyebrow="Authentication"
-            title="Secure login for customers and administrators."
-            description="This phase adds working JWT cookie auth, reset links, and email verification while keeping the setup demo-friendly on a fresh viva machine."
+            title="Secure access for attendees, staff, and administrators."
+            description="Login is designed to feel calm and direct while still supporting role-aware access, verification, reset flows, and a demo-safe environment."
           />
         </div>
         <div className="opacity-0 animate-slide-in-right delay-200">
