@@ -20,7 +20,7 @@ const userSchema = new Schema(
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, index: true, lowercase: true, trim: true },
     passwordHash: { type: String, default: "" },
-    googleId: { type: String, sparse: true },
+    googleId: { type: String },
     authProvider: { type: String, enum: ["LOCAL", "GOOGLE"], default: "LOCAL" },
     role: { type: String, enum: USER_ROLES, default: "USER", index: true },
     phone: { type: String, default: "" },
