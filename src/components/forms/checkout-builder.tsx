@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { readJson } from "@/lib/api";
+import { DISCOUNT_RULES } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
 import type { BookingQuote } from "@/types/booking";
 import type { EventDetail } from "@/types/events";
@@ -226,9 +227,20 @@ export function CheckoutBuilder({
                 }
               />
               <p className="text-xs text-muted-foreground">
-                Available: {loyaltyPoints} points. Max 20% of subtotal can be redeemed.
+                Available: {loyaltyPoints} points. 1 point = NPR{" "}
+                {DISCOUNT_RULES.loyaltyRedemptionValuePerPoint}. Max{" "}
+                {DISCOUNT_RULES.maxLoyaltyRedemptionPercentage}% of subtotal can be redeemed.
               </p>
             </div>
+          </div>
+
+          <div className="rounded-[24px] border border-border bg-[linear-gradient(145deg,#f5f4f0_0%,#ece9e2_100%)] p-4 text-sm leading-7 text-muted-foreground">
+            Loyalty math: points earned are calculated from the final paid amount after
+            discounts. This booking uses the rule{" "}
+            <span className="font-semibold text-foreground">
+              floor(final paid amount x {DISCOUNT_RULES.pointsPerCurrencyUnit})
+            </span>,
+            which means you earn about 1 point for every NPR 10 spent.
           </div>
 
           <label
@@ -321,6 +333,9 @@ export function CheckoutBuilder({
 
               <p className="text-xs text-muted-foreground">
                 Booking reward after successful payment: {quote.loyaltyPointsEarned} points
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Balance update after payment: current points - redeemed points + earned points
               </p>
             </div>
           ) : (
