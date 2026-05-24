@@ -2,14 +2,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentUser, requireUser } from "@/lib/auth";
-
-const userNavItems = [
-  { href: "/dashboard", label: "Overview" },
-  { href: "/profile", label: "Profile" },
-  { href: "/tickets", label: "Tickets" },
-  { href: "/loyalty", label: "Loyalty" },
-  { href: "/wishlist", label: "Wishlist" },
-];
+import { userNavItems } from "@/lib/user-nav";
 
 export default async function ProfilePage() {
   await requireUser();

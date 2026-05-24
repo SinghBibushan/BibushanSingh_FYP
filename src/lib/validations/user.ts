@@ -12,7 +12,7 @@ export const updateProfileSchema = z.object({
 });
 
 export const adminUserUpdateSchema = z.object({
-  role: z.enum(["USER", "ADMIN"]).optional(),
+  role: z.enum(["USER", "STAFF", "ORGANIZER", "ADMIN"]).optional(),
   loyaltyPoints: z.number().int().min(0).optional(),
   studentVerificationStatus: z
     .enum(["PENDING", "APPROVED", "REJECTED"])

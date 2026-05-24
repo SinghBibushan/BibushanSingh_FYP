@@ -5,16 +5,9 @@ import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireUser } from "@/lib/auth";
+import { userNavItems } from "@/lib/user-nav";
 import { formatDate } from "@/lib/utils";
 import { getCurrentUserTickets } from "@/server/tickets/service";
-
-const userNavItems = [
-  { href: "/dashboard", label: "Overview" },
-  { href: "/profile", label: "Profile" },
-  { href: "/tickets", label: "Tickets" },
-  { href: "/loyalty", label: "Loyalty" },
-  { href: "/wishlist", label: "Wishlist" },
-];
 
 export default async function TicketsPage() {
   await requireUser();
@@ -79,6 +72,12 @@ export default async function TicketsPage() {
                         <p className="text-sm font-medium text-muted-foreground">
                           {formatDate(ticket.eventStartsAt)}
                         </p>
+                        {ticket.checkedInAt ? (
+                          <p className="text-sm font-medium text-emerald-700">
+                            Checked in {formatDate(ticket.checkedInAt)}
+                            {ticket.checkInGate ? ` at ${ticket.checkInGate}` : ""}
+                          </p>
+                        ) : null}
                       </div>
 
                       <div className="grid gap-3 sm:grid-cols-2">

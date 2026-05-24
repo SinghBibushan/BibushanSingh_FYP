@@ -3,16 +3,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireUser } from "@/lib/auth";
 import { DISCOUNT_RULES, LOYALTY_TIER_THRESHOLDS } from "@/lib/constants";
+import { userNavItems } from "@/lib/user-nav";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { getLoyaltySnapshot } from "@/server/tickets/service";
-
-const userNavItems = [
-  { href: "/dashboard", label: "Overview" },
-  { href: "/profile", label: "Profile" },
-  { href: "/tickets", label: "Tickets" },
-  { href: "/loyalty", label: "Loyalty" },
-  { href: "/wishlist", label: "Wishlist" },
-];
 
 export default async function LoyaltyPage() {
   await requireUser();

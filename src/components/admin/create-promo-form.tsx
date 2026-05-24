@@ -13,7 +13,11 @@ import { readJson } from "@/lib/api";
 const selectClassName =
   "flex h-12 w-full rounded-2xl border border-border bg-white/70 px-4 text-sm text-foreground outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] focus-visible:ring-2 focus-visible:ring-ring";
 
-export function CreatePromoForm() {
+export function CreatePromoForm({
+  eventOptions,
+}: {
+  eventOptions: Array<{ id: string; label: string }>;
+}) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -24,8 +28,10 @@ export function CreatePromoForm() {
     maxDiscountAmount: "500",
     minimumSubtotal: "1000",
     usageLimit: "100",
+    perUserUsageLimit: "1",
     validFrom: "",
     validUntil: "",
+    applicableEventIds: [] as string[],
   });
 
   function update<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
@@ -50,6 +56,8 @@ export function CreatePromoForm() {
           maxDiscountAmount: Number(form.maxDiscountAmount),
           minimumSubtotal: Number(form.minimumSubtotal),
           usageLimit: Number(form.usageLimit),
+          perUserUsageLimit: Number(form.perUserUsageLimit),
+          applicableEventIds: form.applicableEventIds,
           validFrom: form.validFrom,
           validUntil: form.validUntil,
           isActive: true,
@@ -115,12 +123,44 @@ export function CreatePromoForm() {
             <Input type="number" value={form.usageLimit} onChange={(e) => update("usageLimit", e.target.value)} />
           </div>
           <div className="space-y-2">
+            <Label>Per-user limit</Label>
+            <Input
+              type="number"
+              value={form.perUserUsageLimit}
+              onChange={(e) => update("perUserUsageLimit", e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
             <Label>Valid from</Label>
             <Input type="datetime-local" value={form.validFrom} onChange={(e) => update("validFrom", e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label>Valid until</Label>
             <Input type="datetime-local" value={form.validUntil} onChange={(e) => update("validUntil", e.target.value)} />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label>Applicable events</Label>
+            <select
+              multiple
+              className={`${selectClassName} min-h-36 py-3`}
+              value={form.applicableEventIds}
+              onChange={(e) =>
+                update(
+                  "applicableEventIds",
+                  Array.from(e.target.selectedOptions, (option) => option.value),
+                )
+              }
+            >
+              {eventOptions.map((event) => (
+                <option key={event.id} value={event.id}>
+                  {event.label}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-muted-foreground">
+              Leave empty to allow the promo on all events. Select one or more events to
+              lock the code to those listings only.
+            </p>
           </div>
           <div className="md:col-span-2">
             <Button disabled={loading}>{loading ? "Creating..." : "Create promo code"}</Button>

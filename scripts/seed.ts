@@ -11,6 +11,7 @@ async function main() {
   console.log("Database seeded successfully.");
   console.log(`Demo admin: ${credentials.adminEmail} / ${credentials.adminPassword}`);
   console.log(`Demo user: ${credentials.userEmail} / ${credentials.userPassword}`);
+  console.log(`Demo staff: ${credentials.staffEmail} / ${credentials.staffPassword}`);
 }
 
 main()

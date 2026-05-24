@@ -17,7 +17,7 @@ type NotificationInput = {
 
 type InAppNotificationInput = {
   userId: string;
-  type: "BOOKING_CONFIRMED" | "EVENT_REMINDER" | "PAYMENT_SUCCESS" | "REVIEW_REQUEST" | "CHAT_MESSAGE" | "EVENT_UPDATE" | "BOOKING_CANCELLED" | "STUDENT_VERIFIED" | "NEW_EVENT";
+  type: "BOOKING_CONFIRMED" | "EVENT_REMINDER" | "PAYMENT_SUCCESS" | "REVIEW_REQUEST" | "CHAT_MESSAGE" | "EVENT_UPDATE" | "BOOKING_CANCELLED" | "STUDENT_VERIFIED" | "NEW_EVENT" | "TICKET_CHECKED_IN";
   title: string;
   message: string;
   link?: string;

@@ -7,13 +7,15 @@ import { env } from "@/lib/env";
 import { AppError } from "@/lib/errors";
 import {
   adminEventSchema,
+  adminEventReviewSchema,
   adminPromoCodeSchema,
   studentReviewSchema,
   type AdminEventInput,
+  type AdminEventReviewInput,
   type AdminPromoCodeInput,
   type StudentReviewInput,
 } from "@/lib/validations/admin";
-import { slugify } from "@/lib/utils";
+import { getTicketSaleWindow, slugify } from "@/lib/utils";
 import { AuditLog } from "@/models/AuditLog";
 import { Booking } from "@/models/Booking";
 import { ChatMessage } from "@/models/ChatMessage";
@@ -81,8 +83,9 @@ export async function getAdminOverview() {
   }
 
   await connectToDatabase();
-  const [eventCount, promoCount, bookingCount, userCount, sales] = await Promise.all([
+  const [eventCount, pendingEventCount, promoCount, bookingCount, userCount, sales] = await Promise.all([
     Event.countDocuments({ status: "PUBLISHED" }),
+    Event.countDocuments({ status: "PENDING_APPROVAL" }),
     PromoCode.countDocuments({}),
     Booking.countDocuments({}),
     User.countDocuments({}),
@@ -95,6 +98,7 @@ export async function getAdminOverview() {
   return {
     metrics: [
       { label: "Published Events", value: String(eventCount), note: "Live event catalog" },
+      { label: "Pending Approvals", value: String(pendingEventCount), note: "Organizer submissions awaiting review" },
       { label: "Promo Codes", value: String(promoCount), note: "Active and scheduled discounts" },
       { label: "Bookings", value: String(bookingCount), note: "Pending and confirmed combined" },
       {
@@ -114,10 +118,12 @@ export async function listAdminEvents() {
       id: event.id,
       title: event.title,
       slug: event.slug,
+      organizerName: event.organizerName,
       category: event.category,
       city: event.city,
       startsAt: event.startsAt,
       status: "PUBLISHED",
+      reviewNotes: "",
       featured: event.featured,
       priceFrom: event.priceFrom,
       ticketTypes: event.ticketTypes.length,
@@ -138,10 +144,12 @@ export async function listAdminEvents() {
       id: String(event._id),
       title: event.title,
       slug: event.slug,
+      organizerName: event.organizerName,
       category: event.category,
       city: event.city,
       startsAt: new Date(event.startsAt).toISOString(),
       status: event.status,
+      reviewNotes: event.reviewNotes ?? "",
       featured: Boolean(event.settings?.featured),
       priceFrom: forEvent.length ? Math.min(...forEvent.map((ticket) => ticket.price)) : 0,
       ticketTypes: forEvent.length,
@@ -182,6 +190,7 @@ export async function createAdminEvent(input: AdminEventInput) {
     venueName: data.venueName,
     venueAddress: data.venueAddress,
     mapUrl: "",
+    organizerUserId: null,
     organizerName: data.organizerName,
     organizerEmail: data.organizerEmail,
     tags: data.tags
@@ -195,19 +204,23 @@ export async function createAdminEvent(input: AdminEventInput) {
   });
 
   const ticketTypes = await TicketType.insertMany(
-    data.ticketTypes.map((ticket) => ({
-      eventId: event._id,
-      name: ticket.name,
-      description: ticket.description,
-      price: ticket.price,
-      currency: "NPR",
-      quantityTotal: ticket.quantityTotal,
-      quantitySold: 0,
-      saleStartsAt: new Date(data.startsAt),
-      saleEndsAt: new Date(data.endsAt),
-      perUserLimit: ticket.perUserLimit,
-      benefits: [],
-    })),
+    data.ticketTypes.map((ticket) => {
+      const { saleStartsAt, saleEndsAt } = getTicketSaleWindow(data.startsAt, data.endsAt);
+
+      return {
+        eventId: event._id,
+        name: ticket.name,
+        description: ticket.description,
+        price: ticket.price,
+        currency: "NPR",
+        quantityTotal: ticket.quantityTotal,
+        quantitySold: 0,
+        saleStartsAt,
+        saleEndsAt,
+        perUserLimit: ticket.perUserLimit,
+        benefits: [],
+      };
+    }),
   );
 
   event.ticketTypeIds = ticketTypes.map((ticket) => ticket._id);
@@ -240,6 +253,81 @@ export async function createAdminEvent(input: AdminEventInput) {
   await Promise.all(notificationPromises);
 
   return { message: "Event created successfully.", id: String(event._id) };
+}
+
+export async function reviewAdminEvent(id: string, input: AdminEventReviewInput) {
+  const session = await requireAdminApiSession();
+
+  if (!env.MONGODB_URI) {
+    throw new AppError("Database is required for event review.", 503, "DB_REQUIRED");
+  }
+
+  const data = adminEventReviewSchema.parse(input);
+  await connectToDatabase();
+
+  const event = await Event.findById(id);
+
+  if (!event) {
+    throw new AppError("Event not found.", 404, "NOT_FOUND");
+  }
+
+  const before = event.toObject();
+  event.status = data.status;
+  event.reviewNotes = data.reviewNotes;
+  event.reviewedBy = new Types.ObjectId(session.sub);
+  event.reviewedAt = new Date();
+  await event.save();
+
+  await writeAuditLog({
+    actorUserId: session.sub,
+    action: "REVIEW",
+    entityType: "Event",
+    entityId: id,
+    before,
+    after: event.toObject(),
+  });
+
+  if (event.organizerUserId) {
+    const organizer = await User.findById(event.organizerUserId);
+
+    if (organizer) {
+      const title =
+        data.status === "PUBLISHED" ? "Event approved and published" : "Event submission rejected";
+      const message =
+        data.status === "PUBLISHED"
+          ? `Your event ${event.title} has been approved and is now live for customers.`
+          : `Your event ${event.title} was rejected. ${data.reviewNotes || "Please update the event details and submit it again."}`;
+
+      await logNotification({
+        userId: String(organizer._id),
+        email: organizer.email,
+        channel: "EMAIL",
+        type: "EVENT_UPDATE",
+        subject: title,
+        message,
+        payload: {
+          eventId: String(event._id),
+          eventTitle: event.title,
+          status: data.status,
+          reviewNotes: data.reviewNotes,
+        },
+      });
+
+      await createInAppNotification({
+        userId: String(organizer._id),
+        type: "EVENT_UPDATE",
+        title,
+        message,
+        link: "/organizer/events",
+        metadata: {
+          eventId: String(event._id),
+          status: data.status,
+        },
+      });
+    }
+  }
+
+  return { message: `Event ${data.status === "PUBLISHED" ? "published" : "rejected"} successfully.` };
 }
 
 export async function deleteAdminEvent(id: string) {
@@ -282,6 +370,9 @@ export async function listAdminPromoCodes() {
       minimumSubtotal: promo.minimumSubtotal,
       usageLimit: 0,
       usedCount: 0,
+      perUserUsageLimit: promo.perUserUsageLimit,
+      applicableEvents:
+        promo.applicableSlugs.length > 0 ? promo.applicableSlugs : ["All events"],
       validUntil: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(),
       isActive: promo.isActive,
     }));
@@ -289,6 +380,19 @@ export async function listAdminPromoCodes() {
 
   await connectToDatabase();
   const promoCodes = await PromoCode.find({}).sort({ createdAt: -1 }).lean();
+  const applicableEventIds = Array.from(
+    new Set(
+      promoCodes.flatMap((promo) =>
+        (promo.applicableEventIds ?? []).map((id: Types.ObjectId) => String(id)),
+      ),
+    ),
+  );
+  const events =
+    applicableEventIds.length > 0
+      ? await Event.find({ _id: { $in: applicableEventIds } })
+          .select({ _id: 1, title: 1 })
+          .lean()
+      : [];
 
   return promoCodes.map((promo) => ({
     id: String(promo._id),
@@ -299,6 +403,14 @@ export async function listAdminPromoCodes() {
     minimumSubtotal: promo.minimumSubtotal,
     usageLimit: promo.usageLimit,
     usedCount: promo.usedCount,
+    perUserUsageLimit: promo.perUserUsageLimit ?? 1,
+    applicableEvents:
+      promo.applicableEventIds?.length
+        ? promo.applicableEventIds.map((eventId: Types.ObjectId) => {
+            const event = events.find((item) => String(item._id) === String(eventId));
+            return event?.title ?? "Unknown event";
+          })
+        : ["All events"],
     validUntil: new Date(promo.validUntil).toISOString(),
     isActive: promo.isActive,
   }));
@@ -328,7 +440,10 @@ export async function createAdminPromoCode(input: AdminPromoCodeInput) {
     validUntil: new Date(data.validUntil),
     usageLimit: data.usageLimit,
     usedCount: 0,
-    applicableEventIds: [],
+    perUserUsageLimit: data.perUserUsageLimit,
+    applicableEventIds: data.applicableEventIds
+      .filter((id) => Types.ObjectId.isValid(id))
+      .map((id) => new Types.ObjectId(id)),
     minimumSubtotal: data.minimumSubtotal,
     isActive: data.isActive,
   });

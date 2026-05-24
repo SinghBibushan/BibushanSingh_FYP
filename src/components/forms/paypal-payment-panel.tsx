@@ -35,16 +35,19 @@ declare global {
 export function PayPalPaymentPanel({
   bookingCode,
   currency,
+  environment,
   disabled,
 }: {
   bookingCode: string;
   currency: string;
+  environment: "sandbox" | "live";
   disabled: boolean;
 }) {
   const router = useRouter();
   const containerId = useId().replace(/:/g, "");
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
   const [ready, setReady] = useState(false);
+  const [debugMessage, setDebugMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!clientId || disabled) {
@@ -70,6 +73,7 @@ export function PayPalPaymentPanel({
       }
 
       container.innerHTML = "";
+      setDebugMessage(null);
 
       buttons = window.paypal.Buttons({
         style: {
@@ -79,38 +83,54 @@ export function PayPalPaymentPanel({
           shape: "pill",
         },
         createOrder: async () => {
-          const response = await fetch("/api/payments/paypal/order", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ bookingCode }),
-          });
+          try {
+            const response = await fetch("/api/payments/paypal/order", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ bookingCode }),
+            });
 
-          const data = await readJson<{ orderId: string }>(response);
-          return data.orderId;
+            const data = await readJson<{ orderId: string }>(response);
+            return data.orderId;
+          } catch (error) {
+            const message =
+              error instanceof Error ? error.message : "Could not create PayPal order.";
+            setDebugMessage(message);
+            throw error;
+          }
         },
         onApprove: async (data) => {
-          const response = await fetch("/api/payments/paypal/capture", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              bookingCode,
-              orderId: data.orderID,
-            }),
-          });
+          try {
+            const response = await fetch("/api/payments/paypal/capture", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                bookingCode,
+                orderId: data.orderID,
+              }),
+            });
 
-          const result = await readJson<{ message: string }>(response);
-          toast.success(result.message);
-          router.refresh();
+            const result = await readJson<{ message: string }>(response);
+            setDebugMessage(null);
+            toast.success(result.message);
+            router.refresh();
+          } catch (error) {
+            const message =
+              error instanceof Error ? error.message : "Could not capture PayPal payment.";
+            setDebugMessage(message);
+            toast.error(message);
+          }
         },
         onCancel: () => {
           toast.message("PayPal checkout was cancelled.");
         },
         onError: (error) => {
           const message = error instanceof Error ? error.message : "PayPal checkout failed.";
+          setDebugMessage(message);
           toast.error(message);
         },
       });
@@ -169,6 +189,17 @@ export function PayPalPaymentPanel({
       <div id={containerId} className="min-h-12" />
       {!ready ? (
         <p className="text-xs text-muted-foreground">Loading PayPal checkout...</p>
+      ) : null}
+      {environment === "sandbox" ? (
+        <div className="rounded-[20px] border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-6 text-amber-800">
+          PayPal is running in sandbox mode. Use a PayPal sandbox personal buyer
+          account from the PayPal Developer dashboard, not a real PayPal account.
+        </div>
+      ) : null}
+      {debugMessage ? (
+        <div className="rounded-[20px] border border-red-200 bg-red-50 px-4 py-3 text-xs leading-6 text-red-700">
+          {debugMessage}
+        </div>
       ) : null}
     </div>
   );

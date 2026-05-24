@@ -5,8 +5,8 @@ const notificationSchema = new Schema(
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
     type: {
       type: String,
-      enum: ["BOOKING_CONFIRMED", "EVENT_REMINDER", "PAYMENT_SUCCESS", "REVIEW_REQUEST", "CHAT_MESSAGE", "EVENT_UPDATE", "BOOKING_CANCELLED", "STUDENT_VERIFIED", "NEW_EVENT"],
-      required: true
+      enum: ["BOOKING_CONFIRMED", "EVENT_REMINDER", "PAYMENT_SUCCESS", "REVIEW_REQUEST", "CHAT_MESSAGE", "EVENT_UPDATE", "BOOKING_CANCELLED", "STUDENT_VERIFIED", "NEW_EVENT", "TICKET_CHECKED_IN"],
+      required: true,
     },
     title: { type: String, required: true },
     message: { type: String, required: true },

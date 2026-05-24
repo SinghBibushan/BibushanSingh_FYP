@@ -224,6 +224,7 @@ export const demoPromoCodes: Array<{
   discountValue: number;
   maxDiscountAmount: number;
   minimumSubtotal: number;
+  perUserUsageLimit: number;
   applicableSlugs: string[];
   isActive: boolean;
 }> = [
@@ -234,6 +235,7 @@ export const demoPromoCodes: Array<{
     discountValue: 10,
     maxDiscountAmount: 600,
     minimumSubtotal: 1000,
+    perUserUsageLimit: 1,
     applicableSlugs: ["kathmandu-night-vibes", "pokhara-adventure-film-fest"],
     isActive: true,
   },
@@ -244,6 +246,7 @@ export const demoPromoCodes: Array<{
     discountValue: 500,
     maxDiscountAmount: 500,
     minimumSubtotal: 3000,
+    perUserUsageLimit: 1,
     applicableSlugs: [],
     isActive: true,
   },

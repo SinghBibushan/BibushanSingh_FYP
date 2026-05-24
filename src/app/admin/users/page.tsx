@@ -9,6 +9,8 @@ export default async function AdminUsersPage() {
   await requireAdmin();
   const users = await listAdminUsers();
   const adminCount = users.filter((user) => user.role === "ADMIN").length;
+  const staffCount = users.filter((user) => user.role === "STAFF").length;
+  const organizerCount = users.filter((user) => user.role === "ORGANIZER").length;
 
   return (
     <AppShell
@@ -19,7 +21,7 @@ export default async function AdminUsersPage() {
       currentPath="/admin/users"
     >
       <div className="space-y-5">
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           <Card className="bg-white/78">
             <CardContent className="space-y-3">
               <p className="text-[0.72rem] uppercase tracking-[0.22em] text-muted-foreground">
@@ -34,6 +36,22 @@ export default async function AdminUsersPage() {
                 Admin accounts
               </p>
               <p className="text-4xl font-semibold leading-none text-foreground">{adminCount}</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/78">
+            <CardContent className="space-y-3">
+              <p className="text-[0.72rem] uppercase tracking-[0.22em] text-muted-foreground">
+                Staff accounts
+              </p>
+              <p className="text-4xl font-semibold leading-none text-foreground">{staffCount}</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/78">
+            <CardContent className="space-y-3">
+              <p className="text-[0.72rem] uppercase tracking-[0.22em] text-muted-foreground">
+                Organizer accounts
+              </p>
+              <p className="text-4xl font-semibold leading-none text-foreground">{organizerCount}</p>
             </CardContent>
           </Card>
         </div>

@@ -1,6 +1,12 @@
-export const USER_ROLES = ["USER", "ADMIN"] as const;
+export const USER_ROLES = ["USER", "STAFF", "ORGANIZER", "ADMIN"] as const;
 export const LOYALTY_TIERS = ["BRONZE", "SILVER", "GOLD"] as const;
-export const EVENT_STATUSES = ["DRAFT", "PUBLISHED", "CANCELLED"] as const;
+export const EVENT_STATUSES = [
+  "DRAFT",
+  "PENDING_APPROVAL",
+  "PUBLISHED",
+  "REJECTED",
+  "CANCELLED",
+] as const;
 export const BOOKING_STATUSES = [
   "PENDING",
   "CONFIRMED",

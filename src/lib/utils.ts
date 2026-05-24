@@ -30,3 +30,18 @@ export function slugify(value: string) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 }
+
+export function getTicketSaleWindow(startsAt: Date | string, endsAt?: Date | string) {
+  const eventStart = new Date(startsAt);
+  const eventEnd = endsAt ? new Date(endsAt) : new Date(eventStart);
+  const ninetyDaysMs = 1000 * 60 * 60 * 24 * 90;
+
+  // Keep seeded/demo events bookable well ahead of time so the viva flow is reliable.
+  const saleStartsAt = new Date(eventStart.getTime() - ninetyDaysMs);
+  const saleEndsAt = new Date(eventEnd);
+
+  return {
+    saleStartsAt,
+    saleEndsAt,
+  };
+}

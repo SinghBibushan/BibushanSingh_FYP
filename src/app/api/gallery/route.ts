@@ -3,6 +3,29 @@ import { connectDB } from "@/lib/db";
 import { EventGallery } from "@/models/EventGallery";
 import { verifyAuth } from "@/lib/auth";
 
+const allowedImageHosts = new Set([
+  "images.unsplash.com",
+  "res.cloudinary.com",
+  "lh3.googleusercontent.com",
+  ...(process.env.IMAGE_REMOTE_HOSTS ?? "")
+    .split(",")
+    .map((host) => host.trim())
+    .filter(Boolean),
+]);
+
+function isAllowedImageUrl(value: unknown) {
+  if (typeof value !== "string") {
+    return false;
+  }
+
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && allowedImageHosts.has(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
 export async function GET(req: NextRequest) {
   try {
     await connectDB();
@@ -35,11 +58,18 @@ export async function POST(req: NextRequest) {
 
     const { eventId, imageUrl, caption } = await req.json();
 
+    if (!eventId || !isAllowedImageUrl(imageUrl)) {
+      return NextResponse.json(
+        { error: "A valid HTTPS image URL from an approved host is required." },
+        { status: 400 },
+      );
+    }
+
     const photo = await EventGallery.create({
       eventId,
       userId: user._id,
       imageUrl,
-      caption,
+      caption: typeof caption === "string" ? caption.trim().slice(0, 160) : "",
       approved: true, // Auto-approve for now
     });
 

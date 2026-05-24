@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
+import "dotenv/config";
 
-const MONGODB_URI =
-  process.env.MONGODB_URI ||
-  "mongodb+srv://eventease_admin:EventEase2026@cluster0.9ygulok.mongodb.net/eventease?retryWrites=true&w=majority";
+const MONGODB_URI = process.env.MONGODB_URI;
 
 type MongoError = {
   code?: number;
@@ -11,6 +10,14 @@ type MongoError = {
 
 async function fixDatabase() {
   try {
+    if (!MONGODB_URI) {
+      throw new Error("MONGODB_URI is required.");
+    }
+
+    if (process.env.CONFIRM_DATABASE_RESET !== "true") {
+      throw new Error("Set CONFIRM_DATABASE_RESET=true to clear database collections.");
+    }
+
     console.log("Connecting to MongoDB...");
     await mongoose.connect(MONGODB_URI);
 

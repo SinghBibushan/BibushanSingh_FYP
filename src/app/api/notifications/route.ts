@@ -38,14 +38,23 @@ export async function PATCH(req: NextRequest) {
 
     await connectToDatabase();
 
-    const { notificationId } = await req.json();
+    const { notificationId, markAll } = (await req.json()) as {
+      notificationId?: string;
+      markAll?: boolean;
+    };
 
-    await Notification.findOneAndUpdate(
-      { _id: notificationId, userId: user._id },
-      { read: true }
-    );
+    if (markAll) {
+      await Notification.updateMany({ userId: user._id, read: false }, { read: true });
+      return NextResponse.json({ success: true, mode: "all" });
+    }
 
-    return NextResponse.json({ success: true });
+    if (!notificationId) {
+      return NextResponse.json({ error: "Notification ID required" }, { status: 400 });
+    }
+
+    await Notification.findOneAndUpdate({ _id: notificationId, userId: user._id }, { read: true });
+
+    return NextResponse.json({ success: true, mode: "single" });
   } catch (error) {
     console.error("Mark notification read error:", error);
     return NextResponse.json({ error: "Failed to update notification" }, { status: 500 });

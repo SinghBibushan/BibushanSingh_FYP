@@ -1,10 +1,13 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { CancelBookingButton } from "@/components/bookings/cancel-booking-button";
 import { MockPaymentPanel } from "@/components/forms/mock-payment-panel";
 import { PayPalPaymentPanel } from "@/components/forms/paypal-payment-panel";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { env } from "@/lib/env";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { getBookingDetails } from "@/server/bookings/service";
 
@@ -56,6 +59,20 @@ export default async function BookingDetailsPage({
               This page separates booking creation from payment confirmation so the
               viva can clearly demonstrate pending and confirmed states.
             </p>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/bookings"
+                className="inline-flex items-center justify-center rounded-full border border-border bg-white px-5 py-3 text-sm font-semibold text-foreground"
+              >
+                Back to bookings
+              </Link>
+              {booking.status === "CONFIRMED" ? (
+                <CancelBookingButton
+                  bookingCode={booking.bookingCode}
+                  className="border-red-200 text-red-700 hover:border-red-300 hover:bg-red-50"
+                />
+              ) : null}
+            </div>
           </div>
 
           <Card>
@@ -163,6 +180,7 @@ export default async function BookingDetailsPage({
                 <PayPalPaymentPanel
                   bookingCode={booking.bookingCode}
                   currency={payment.meta?.payableCurrency ?? "USD"}
+                  environment={env.PAYPAL_ENVIRONMENT}
                   disabled={booking.status === "CONFIRMED"}
                 />
               ) : (

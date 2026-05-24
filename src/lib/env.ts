@@ -64,6 +64,8 @@ export const isPayPalEnabled = Boolean(
     env.PAYPAL_CLIENT_SECRET &&
     env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
 );
+export const isDemoMockPaymentAvailable =
+  isMockPaymentEnabled || env.NODE_ENV !== "production";
 
 export function isJwtSecretConfigured() {
   if (env.NODE_ENV !== "production") {

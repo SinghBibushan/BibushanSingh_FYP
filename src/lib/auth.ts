@@ -13,7 +13,7 @@ export type SessionPayload = {
   sub: string;
   _id?: string;
   email: string;
-  role: "USER" | "ADMIN";
+  role: "USER" | "STAFF" | "ORGANIZER" | "ADMIN";
   name: string;
 };
 
@@ -158,6 +158,26 @@ export async function requireAdmin() {
   const session = await requireUser();
 
   if (session.role !== "ADMIN") {
+    redirect("/dashboard");
+  }
+
+  return session;
+}
+
+export async function requireOrganizer() {
+  const session = await requireUser();
+
+  if (session.role !== "ORGANIZER") {
+    redirect("/dashboard");
+  }
+
+  return session;
+}
+
+export async function requireStaffAccess() {
+  const session = await requireUser();
+
+  if (session.role !== "STAFF" && session.role !== "ADMIN") {
     redirect("/dashboard");
   }
 

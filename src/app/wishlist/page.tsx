@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireUser } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
+import { userNavItems } from "@/lib/user-nav";
 import { formatDate } from "@/lib/utils";
 import { Wishlist } from "@/models/Wishlist";
 
@@ -25,14 +26,6 @@ type WishlistRecord = {
   createdAt: Date;
   eventId: WishlistEvent | null;
 };
-
-const userNavItems = [
-  { href: "/dashboard", label: "Overview" },
-  { href: "/profile", label: "Profile" },
-  { href: "/tickets", label: "Tickets" },
-  { href: "/loyalty", label: "Loyalty" },
-  { href: "/wishlist", label: "Wishlist" },
-];
 
 export default async function WishlistPage() {
   const user = await requireUser();

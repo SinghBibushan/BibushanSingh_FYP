@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Bell } from "lucide-react";
 
 interface Notification {
@@ -129,6 +130,15 @@ export function NotificationBell() {
                     </p>
                   </button>
                 ))}
+                <div className="p-4">
+                  <Link
+                    href="/notifications"
+                    onClick={() => setShowDropdown(false)}
+                    className="block rounded-2xl border border-border bg-white px-4 py-3 text-center text-sm font-semibold text-foreground transition hover:border-primary/20 hover:bg-muted"
+                  >
+                    View all notifications
+                  </Link>
+                </div>
               </div>
             )}
           </div>

@@ -246,6 +246,16 @@ The reset script prepares:
 
 The system uses the built-in payment simulation instead of a real gateway.
 
+### PayPal sandbox
+
+If `MOCK_PAYMENT_ENABLED=false` and PayPal env values are configured, the app uses PayPal.
+
+Important:
+
+- when `PAYPAL_ENVIRONMENT=sandbox`, you must sign in with a PayPal **sandbox personal buyer account**
+- do not use your real PayPal account in sandbox checkout
+- if checkout fails, confirm the buyer account exists in the PayPal Developer dashboard and that third-party cookies or popup blocking are not interfering
+
 ### Mock email
 
 `MOCK_EMAIL_ENABLED=true`

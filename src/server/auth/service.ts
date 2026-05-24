@@ -69,7 +69,7 @@ function buildAuthUserResponse(user: {
   _id: unknown;
   name: string;
   email: string;
-  role: "USER" | "ADMIN";
+  role: "USER" | "STAFF" | "ORGANIZER" | "ADMIN";
   emailVerifiedAt?: Date | null;
   avatarUrl?: string;
 }) {

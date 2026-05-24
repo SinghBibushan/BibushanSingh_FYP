@@ -4,10 +4,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { adminNavItems } from "@/lib/admin-nav";
 import { requireAdmin } from "@/lib/auth";
-import { listAdminPromoCodes } from "@/server/admin/service";
+import { listAdminEvents, listAdminPromoCodes } from "@/server/admin/service";
 
 export default async function AdminPromoCodesPage() {
   await requireAdmin();
+  const events = await listAdminEvents();
   const promoCodes = await listAdminPromoCodes();
   const activeCount = promoCodes.filter((promo) => promo.isActive).length;
 
@@ -43,7 +44,14 @@ export default async function AdminPromoCodesPage() {
           </Card>
         </div>
 
-        <CreatePromoForm />
+        <CreatePromoForm
+          eventOptions={events
+            .filter((event) => event.status === "PUBLISHED")
+            .map((event) => ({
+              id: event.id,
+              label: event.title,
+            }))}
+        />
 
         <Card className="bg-white/78">
           <CardContent className="space-y-4">
@@ -52,7 +60,7 @@ export default async function AdminPromoCodesPage() {
               {promoCodes.map((promo) => (
                 <div
                   key={promo.id}
-                  className="grid gap-4 rounded-[24px] border border-border bg-white/82 p-4 md:grid-cols-[1fr_0.85fr_0.75fr_0.8fr]"
+                  className="grid gap-4 rounded-[24px] border border-border bg-white/82 p-4 md:grid-cols-[1fr_0.85fr_0.95fr_0.95fr]"
                 >
                   <div>
                     <div className="flex flex-wrap items-center gap-3">
@@ -77,10 +85,11 @@ export default async function AdminPromoCodesPage() {
                   <div className="text-sm text-muted-foreground">
                     <p>Used {promo.usedCount}</p>
                     <p>Limit {promo.usageLimit}</p>
+                    <p>Per user {promo.perUserUsageLimit === 0 ? "Unlimited" : promo.perUserUsageLimit}</p>
                   </div>
                   <div className="text-sm text-muted-foreground">
                     <p>{new Date(promo.validUntil).toLocaleDateString()}</p>
-                    <p>Expires on the listed date</p>
+                    <p>{promo.applicableEvents.join(", ")}</p>
                   </div>
                 </div>
               ))}

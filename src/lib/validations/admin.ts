@@ -26,6 +26,17 @@ export const adminEventSchema = z.object({
   ticketTypes: z.array(adminTicketTypeSchema).min(1),
 });
 
+export const organizerEventSchema = adminEventSchema.omit({
+  featured: true,
+}).extend({
+  submissionMode: z.enum(["DRAFT", "PENDING_APPROVAL"]).default("DRAFT"),
+});
+
+export const adminEventReviewSchema = z.object({
+  status: z.enum(["PUBLISHED", "REJECTED"]),
+  reviewNotes: z.string().trim().default(""),
+});
+
 export const adminPromoCodeSchema = z.object({
   code: z.string().trim().min(3).max(20).transform((value) => value.toUpperCase()),
   description: z.string().trim().min(3),
@@ -34,6 +45,8 @@ export const adminPromoCodeSchema = z.object({
   maxDiscountAmount: z.coerce.number().min(0).nullable().optional(),
   minimumSubtotal: z.coerce.number().min(0).default(0),
   usageLimit: z.coerce.number().int().min(0).default(0),
+  perUserUsageLimit: z.coerce.number().int().min(0).default(1),
+  applicableEventIds: z.array(z.string().trim().min(1)).default([]),
   validFrom: z.string().min(1),
   validUntil: z.string().min(1),
   isActive: z.coerce.boolean().default(true),
@@ -45,5 +58,7 @@ export const studentReviewSchema = z.object({
 });
 
 export type AdminEventInput = z.infer<typeof adminEventSchema>;
+export type OrganizerEventInput = z.infer<typeof organizerEventSchema>;
+export type AdminEventReviewInput = z.infer<typeof adminEventReviewSchema>;
 export type AdminPromoCodeInput = z.infer<typeof adminPromoCodeSchema>;
 export type StudentReviewInput = z.infer<typeof studentReviewSchema>;

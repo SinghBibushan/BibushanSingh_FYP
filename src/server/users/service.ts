@@ -51,7 +51,7 @@ export async function updateCurrentUserProfile(input: UpdateProfileInput) {
       avatarUrl: data.avatarUrl,
       notificationPreferences: data.notificationPreferences,
     },
-    { new: true },
+    { returnDocument: "after" },
   ).lean();
 
   if (!user) {
@@ -85,6 +85,11 @@ export async function submitStudentVerification(formData: FormData) {
 
   if (file.size === 0) {
     throw new AppError("Uploaded file is empty.", 400, "EMPTY_FILE");
+  }
+
+  const maxUploadSize = 5 * 1024 * 1024;
+  if (file.size > maxUploadSize) {
+    throw new AppError("Document file must be 5 MB or smaller.", 400, "FILE_TOO_LARGE");
   }
 
   const allowedTypes = [
@@ -121,7 +126,7 @@ export async function submitStudentVerification(formData: FormData) {
       reviewedAt: null,
       notes: "",
     },
-    { upsert: true, new: true, setDefaultsOnInsert: true },
+    { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
   );
 
   await User.findByIdAndUpdate(session.sub, {
@@ -193,7 +198,7 @@ export async function adminUpdateUser(id: string, input: AdminUserUpdateInput) {
         ? { studentVerificationStatus: data.studentVerificationStatus }
         : {}),
     },
-    { new: true },
+    { returnDocument: "after" },
   ).lean();
 
   if (!user) {

@@ -27,6 +27,14 @@ type PayPalCaptureResponse = {
   }>;
 };
 
+type PayPalErrorResponse = {
+  message?: string;
+  details?: Array<{
+    issue?: string;
+    description?: string;
+  }>;
+};
+
 export type PayPalChargeDetails = {
   bookingAmount: number;
   bookingCurrency: string;
@@ -53,6 +61,29 @@ function normalizeCurrency(value: string) {
 
 function formatAmount(value: number) {
   return value.toFixed(2);
+}
+
+async function readPayPalErrorMessage(response: Response, fallback: string) {
+  try {
+    const data = (await response.json()) as PayPalErrorResponse;
+    const detail = data.details?.[0];
+
+    if (detail?.description) {
+      return `${fallback} ${detail.description}`;
+    }
+
+    if (detail?.issue) {
+      return `${fallback} ${detail.issue}`;
+    }
+
+    if (data.message) {
+      return `${fallback} ${data.message}`;
+    }
+  } catch {
+    // Fall through to the generic fallback.
+  }
+
+  return fallback;
 }
 
 export function getPayPalChargeDetails(input: {
@@ -116,7 +147,11 @@ async function getAccessToken() {
   });
 
   if (!response.ok) {
-    throw new AppError("Could not authenticate with PayPal.", 502, "PAYPAL_AUTH_FAILED");
+    throw new AppError(
+      await readPayPalErrorMessage(response, "Could not authenticate with PayPal."),
+      502,
+      "PAYPAL_AUTH_FAILED",
+    );
   }
 
   const data = (await response.json()) as PayPalAccessTokenResponse;
@@ -159,7 +194,11 @@ export async function createPayPalOrder(input: {
   });
 
   if (!response.ok) {
-    throw new AppError("PayPal order creation failed.", 502, "PAYPAL_ORDER_CREATE_FAILED");
+    throw new AppError(
+      await readPayPalErrorMessage(response, "PayPal order creation failed."),
+      502,
+      "PAYPAL_ORDER_CREATE_FAILED",
+    );
   }
 
   const data = (await response.json()) as PayPalCreateOrderResponse;
@@ -191,7 +230,11 @@ export async function capturePayPalOrder(orderId: string) {
   );
 
   if (!response.ok) {
-    throw new AppError("PayPal payment capture failed.", 502, "PAYPAL_CAPTURE_FAILED");
+    throw new AppError(
+      await readPayPalErrorMessage(response, "PayPal payment capture failed."),
+      502,
+      "PAYPAL_CAPTURE_FAILED",
+    );
   }
 
   const data = (await response.json()) as PayPalCaptureResponse;

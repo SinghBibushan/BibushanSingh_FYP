@@ -17,8 +17,12 @@ const eventSchema = new Schema(
     venueName: { type: String, required: true },
     venueAddress: { type: String, required: true },
     mapUrl: { type: String, default: "" },
+    organizerUserId: { type: Schema.Types.ObjectId, ref: "User", default: null, index: true },
     organizerName: { type: String, required: true },
     organizerEmail: { type: String, required: true },
+    reviewNotes: { type: String, default: "" },
+    reviewedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    reviewedAt: { type: Date, default: null },
     tags: { type: [String], default: [] },
     ticketTypeIds: [{ type: Schema.Types.ObjectId, ref: "TicketType" }],
     settings: {

@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/layout/app-shell";
+import { SendRemindersButton } from "@/components/admin/send-reminders-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { adminNavItems } from "@/lib/admin-nav";
 import { requireAdmin } from "@/lib/auth";
@@ -66,6 +67,34 @@ export default async function AdminReportsPage() {
               </div>
               <div className="rounded-[22px] border border-border bg-white/82 p-4 text-sm leading-7 text-muted-foreground">
                 Average order value helps compare pricing and promotion performance.
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white/78">
+          <CardContent className="space-y-4">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-secondary">
+                  Reminder operations
+                </p>
+                <h2 className="mt-2 text-3xl leading-none">Manual communication trigger</h2>
+              </div>
+              <SendRemindersButton />
+            </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="rounded-[22px] border border-border bg-white/82 p-4 text-sm leading-7 text-muted-foreground">
+                Admin can manually trigger reminder notifications for events starting exactly 15
+                days from the current date.
+              </div>
+              <div className="rounded-[22px] border border-border bg-white/82 p-4 text-sm leading-7 text-muted-foreground">
+                Each confirmed attendee receives both an in-app notification and an email/log
+                entry, making the communication flow visible in the viva.
+              </div>
+              <div className="rounded-[22px] border border-border bg-white/82 p-4 text-sm leading-7 text-muted-foreground">
+                Duplicate reminders are blocked by checking existing reminder records for the same
+                user and event.
               </div>
             </div>
           </CardContent>

@@ -19,12 +19,12 @@ export function CheckoutBuilder({
   event,
   loyaltyPoints,
   studentVerified,
-  paymentMode,
+  availablePaymentProviders,
 }: {
   event: EventDetail;
   loyaltyPoints: number;
   studentVerified: boolean;
-  paymentMode: "MOCK" | "PAYPAL" | "NONE";
+  availablePaymentProviders: Array<"MOCK" | "PAYPAL">;
 }) {
   const router = useRouter();
   const [quantities, setQuantities] = useState<Record<string, number>>(
@@ -36,6 +36,11 @@ export function CheckoutBuilder({
   const [quote, setQuote] = useState<BookingQuote | null>(null);
   const [isQuoting, setIsQuoting] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [paymentProvider, setPaymentProvider] = useState<"MOCK" | "PAYPAL" | null>(
+    availablePaymentProviders.includes("MOCK")
+      ? "MOCK"
+      : (availablePaymentProviders[0] ?? null),
+  );
 
   const selections = useMemo(
     () =>
@@ -73,6 +78,7 @@ export function CheckoutBuilder({
           promoCode,
           useStudentDiscount,
           loyaltyPointsToRedeem,
+          paymentProvider,
         }),
       });
 
@@ -102,6 +108,7 @@ export function CheckoutBuilder({
           promoCode,
           useStudentDiscount,
           loyaltyPointsToRedeem,
+          paymentProvider,
         }),
       });
 
@@ -266,6 +273,39 @@ export function CheckoutBuilder({
               </span>
             </span>
           </label>
+
+          <div className="space-y-3">
+            <Label>Payment method</Label>
+            {availablePaymentProviders.length === 0 ? (
+              <div className="rounded-[24px] border border-border bg-white/82 p-4 text-sm text-muted-foreground">
+                No payment provider is currently available.
+              </div>
+            ) : (
+              <div className="grid gap-3 md:grid-cols-2">
+                {availablePaymentProviders.map((provider) => (
+                  <button
+                    key={provider}
+                    type="button"
+                    onClick={() => setPaymentProvider(provider)}
+                    className={`rounded-[24px] border p-4 text-left transition ${
+                      paymentProvider === provider
+                        ? "border-primary bg-primary/6"
+                        : "border-border bg-white/82 hover:border-primary/20 hover:bg-white"
+                    }`}
+                  >
+                    <p className="font-semibold text-foreground">
+                      {provider === "MOCK" ? "Mock payment" : "PayPal"}
+                    </p>
+                    <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                      {provider === "MOCK"
+                        ? "Best for viva/demo. Payment succeeds instantly inside the app."
+                        : "Use PayPal sandbox or live checkout depending on environment."}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
@@ -278,9 +318,9 @@ export function CheckoutBuilder({
             <h2 className="text-3xl leading-none">Review before booking</h2>
             <p className="text-sm leading-7 text-muted-foreground">
               Quote first to inspect the final price breakdown, then create a booking and
-              {paymentMode === "PAYPAL"
+              {paymentProvider === "PAYPAL"
                 ? " complete the PayPal payment on the next screen."
-                : paymentMode === "MOCK"
+                : paymentProvider === "MOCK"
                   ? " complete mock payment on the next screen."
                   : " finish payment after a provider is configured."}
             </p>
@@ -352,13 +392,13 @@ export function CheckoutBuilder({
             <Button
               variant="secondary"
               onClick={handleCreateBooking}
-              disabled={isCreating || totalSelected === 0 || paymentMode === "NONE"}
+              disabled={isCreating || totalSelected === 0 || !paymentProvider}
             >
               {isCreating
                 ? "Creating booking..."
-                : paymentMode === "PAYPAL"
+                : paymentProvider === "PAYPAL"
                   ? "Proceed to PayPal checkout"
-                  : paymentMode === "MOCK"
+                  : paymentProvider === "MOCK"
                     ? "Proceed to mock payment"
                     : "Payment unavailable"}
             </Button>

@@ -134,6 +134,8 @@ export async function getCurrentUserTickets() {
         status: ticket.status,
         holderName: ticket.holderName,
         issuedAt: ticket.issuedAt,
+        checkedInAt: ticket.checkedInAt ? new Date(ticket.checkedInAt).toISOString() : null,
+        checkInGate: ticket.checkInGate ?? "",
         eventTitle: event?.title ?? "Event",
         eventSlug: event?.slug ?? "",
         eventVenue: event?.venueName ?? "",

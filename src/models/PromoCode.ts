@@ -11,6 +11,7 @@ const promoCodeSchema = new Schema(
     validUntil: { type: Date, required: true, index: true },
     usageLimit: { type: Number, default: 0, min: 0 },
     usedCount: { type: Number, default: 0, min: 0 },
+    perUserUsageLimit: { type: Number, default: 1, min: 0 },
     applicableEventIds: [{ type: Schema.Types.ObjectId, ref: "Event" }],
     minimumSubtotal: { type: Number, default: 0, min: 0 },
     isActive: { type: Boolean, default: true, index: true },

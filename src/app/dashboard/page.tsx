@@ -11,14 +11,7 @@ import {
 import { AppShell } from "@/components/layout/app-shell";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentUser, requireUser } from "@/lib/auth";
-
-const userNavItems = [
-  { href: "/dashboard", label: "Overview" },
-  { href: "/profile", label: "Profile" },
-  { href: "/tickets", label: "Tickets" },
-  { href: "/loyalty", label: "Loyalty" },
-  { href: "/wishlist", label: "Wishlist" },
-];
+import { userNavItems } from "@/lib/user-nav";
 
 export default async function DashboardPage() {
   await requireUser();
@@ -140,6 +133,12 @@ export default async function DashboardPage() {
               <div className="space-y-3">
                 {[
                   {
+                    href: "/bookings",
+                    label: "Open booking history",
+                    note: "Track pending, confirmed, cancelled, and refunded orders.",
+                    icon: ArrowRight,
+                  },
+                  {
                     href: "/tickets",
                     label: "Review ticket vault",
                     note: "Access QR and PDF tickets from confirmed bookings.",
@@ -150,6 +149,12 @@ export default async function DashboardPage() {
                     label: "Open wishlist",
                     note: "Track events you intend to revisit or book later.",
                     icon: Heart,
+                  },
+                  {
+                    href: "/notifications",
+                    label: "View notifications",
+                    note: "Read reminders, booking updates, and verification notices.",
+                    icon: CheckCircle2,
                   },
                   {
                     href: "/profile",

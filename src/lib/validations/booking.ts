@@ -14,6 +14,9 @@ export const bookingQuoteSchema = z.object({
 });
 
 export const createBookingSchema = bookingQuoteSchema;
+export const createBookingWithProviderSchema = bookingQuoteSchema.extend({
+  paymentProvider: z.enum(["MOCK", "PAYPAL"]).optional(),
+});
 
 export const mockPaymentConfirmSchema = z.object({
   bookingCode: z.string().min(1),
@@ -31,6 +34,7 @@ export const paypalCaptureSchema = z.object({
 
 export type BookingQuoteInput = z.infer<typeof bookingQuoteSchema>;
 export type CreateBookingInput = z.infer<typeof createBookingSchema>;
+export type CreateBookingWithProviderInput = z.infer<typeof createBookingWithProviderSchema>;
 export type MockPaymentConfirmInput = z.infer<typeof mockPaymentConfirmSchema>;
 export type PayPalOrderInput = z.infer<typeof paypalOrderSchema>;
 export type PayPalCaptureInput = z.infer<typeof paypalCaptureSchema>;

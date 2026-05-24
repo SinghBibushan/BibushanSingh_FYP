@@ -6,16 +6,21 @@ import { getSession } from "@/lib/auth";
 import { DISCOUNT_RULES, LOYALTY_TIER_THRESHOLDS } from "@/lib/constants";
 import { demoPromoCodes } from "@/lib/demo-data";
 import { connectToDatabase } from "@/lib/db";
-import { env, isMockPaymentEnabled, isPayPalEnabled } from "@/lib/env";
+import {
+  env,
+  isDemoMockPaymentAvailable,
+  isMockPaymentEnabled,
+  isPayPalEnabled,
+} from "@/lib/env";
 import { AppError } from "@/lib/errors";
 import {
-  createBookingSchema,
+  createBookingWithProviderSchema,
   mockPaymentConfirmSchema,
   paypalCaptureSchema,
   paypalOrderSchema,
   bookingQuoteSchema,
   type BookingQuoteInput,
-  type CreateBookingInput,
+  type CreateBookingWithProviderInput,
   type MockPaymentConfirmInput,
   type PayPalCaptureInput,
   type PayPalOrderInput,
@@ -40,9 +45,24 @@ import type { BookingQuote } from "@/types/booking";
 
 type UserSnapshot = {
   id: string;
-  role: "USER" | "ADMIN";
+  role: "USER" | "STAFF" | "ORGANIZER" | "ADMIN";
   loyaltyPoints: number;
   studentVerificationStatus: string;
+};
+
+type BookingSummaryEvent = {
+  _id: Types.ObjectId;
+  title: string;
+  slug: string;
+  venueName: string;
+  city: string;
+  startsAt: Date | string;
+};
+
+type BookingSummaryPayment = {
+  provider: string;
+  status: string;
+  reference: string;
 };
 
 type MutableBookingRecord = {
@@ -102,7 +122,23 @@ function deriveLoyaltyTier(points: number) {
   return "BRONZE";
 }
 
-function getConfiguredPaymentProvider() {
+function getConfiguredPaymentProvider(requestedProvider?: "MOCK" | "PAYPAL") {
+  if (requestedProvider === "MOCK") {
+    if (isDemoMockPaymentAvailable) {
+      return "MOCK" as const;
+    }
+
+    throw new AppError("Mock payment is not available.", 400, "MOCK_PAYMENT_DISABLED");
+  }
+
+  if (requestedProvider === "PAYPAL") {
+    if (isPayPalEnabled) {
+      return "PAYPAL" as const;
+    }
+
+    throw new AppError("PayPal is not configured.", 503, "PAYMENT_NOT_CONFIGURED");
+  }
+
   if (isMockPaymentEnabled) {
     return "MOCK" as const;
   }
@@ -185,7 +221,7 @@ async function finalizeSuccessfulPayment(input: {
         {
           $inc: { quantitySold: selection.quantity },
         },
-        { new: true },
+        { returnDocument: "after" },
       );
 
       if (!updatedTicket) {
@@ -307,6 +343,7 @@ async function resolvePromoCode(input: {
   rawCode: string | undefined;
   eventId: string;
   eventSlug: string;
+  userId: string;
 }) {
   const code = input.rawCode?.trim().toUpperCase();
 
@@ -320,6 +357,12 @@ async function resolvePromoCode(input: {
     if (!promo) {
       throw new AppError("Promo code not found.", 404, "NOT_FOUND");
     }
+
+    const activeUserPromoUses = await Booking.countDocuments({
+      userId: new Types.ObjectId(input.userId),
+      promoCodeId: promo._id,
+      status: { $in: ["PENDING", "CONFIRMED"] },
+    });
 
     return {
       id: String(promo._id),
@@ -336,6 +379,11 @@ async function resolvePromoCode(input: {
         ),
       usageRemaining:
         promo.usageLimit === 0 ? Infinity : Math.max(promo.usageLimit - promo.usedCount, 0),
+      perUserUsageLimit: promo.perUserUsageLimit ?? 1,
+      perUserRemaining:
+        (promo.perUserUsageLimit ?? 1) === 0
+          ? Infinity
+          : Math.max((promo.perUserUsageLimit ?? 1) - activeUserPromoUses, 0),
       isActive:
         promo.isActive &&
         new Date(promo.validFrom) <= new Date() &&
@@ -357,10 +405,12 @@ async function resolvePromoCode(input: {
     discountValue: promo.discountValue,
     maxDiscountAmount: promo.maxDiscountAmount,
     minimumSubtotal: promo.minimumSubtotal,
+    perUserUsageLimit: promo.perUserUsageLimit,
     appliesToEvent:
       promo.applicableSlugs.length === 0 ||
       promo.applicableSlugs.includes(input.eventSlug),
     usageRemaining: Infinity,
+    perUserRemaining: promo.perUserUsageLimit === 0 ? Infinity : promo.perUserUsageLimit,
     isActive: true,
   };
 }
@@ -390,6 +440,7 @@ export async function quoteBooking(input: BookingQuoteInput) {
     rawCode: data.promoCode,
     eventId: event.id,
     eventSlug: event.slug,
+    userId: user.id,
   });
 
   if (promo) {
@@ -407,6 +458,14 @@ export async function quoteBooking(input: BookingQuoteInput) {
 
     if (promo.usageRemaining <= 0) {
       throw new AppError("Promo code usage limit reached.", 400, "PROMO_EXHAUSTED");
+    }
+
+    if (promo.perUserRemaining <= 0) {
+      throw new AppError(
+        "You have already reached the personal usage limit for this promo code.",
+        400,
+        "PROMO_PER_USER_LIMIT_REACHED",
+      );
     }
 
     if (subtotal < promo.minimumSubtotal) {
@@ -546,12 +605,12 @@ async function getPersistentEvent(slug: string) {
   };
 }
 
-export async function createBooking(input: CreateBookingInput) {
-  const data = createBookingSchema.parse(input);
+export async function createBooking(input: CreateBookingWithProviderInput) {
+  const data = createBookingWithProviderSchema.parse(input);
   const user = await getAuthenticatedUserSnapshot();
   const quote = await quoteBooking(data);
   const { event, ticketTypes } = await getPersistentEvent(data.eventSlug);
-  const paymentProvider = getConfiguredPaymentProvider();
+  const paymentProvider = getConfiguredPaymentProvider(data.paymentProvider);
   const paypalCharge =
     paymentProvider === "PAYPAL"
       ? getPayPalChargeDetails({
@@ -667,8 +726,62 @@ export async function getBookingDetails(bookingCode: string) {
   return booking;
 }
 
+export async function listCurrentUserBookings() {
+  const session = await getSession();
+
+  if (!session) {
+    throw new AppError("Unauthorized.", 401, "UNAUTHORIZED");
+  }
+
+  await connectToDatabase();
+  const bookings = await Booking.find({ userId: new Types.ObjectId(session.sub) })
+    .sort({ createdAt: -1 })
+    .populate("eventId", "title slug venueName city startsAt")
+    .populate("paymentId", "provider status reference")
+    .lean();
+
+  return bookings.map((booking) => {
+    const event = booking.eventId as unknown as BookingSummaryEvent | null;
+    const payment = booking.paymentId as unknown as BookingSummaryPayment | null;
+    const totalTickets = booking.ticketSelections.reduce(
+      (sum: number, selection: { quantity: number }) => sum + selection.quantity,
+      0,
+    );
+
+    return {
+      id: String(booking._id),
+      bookingCode: booking.bookingCode,
+      status: booking.status,
+      createdAt: booking.createdAt,
+      confirmedAt: booking.confirmedAt,
+      totalTickets,
+      totalAmount: booking.pricing.finalAmount,
+      currency: booking.pricing.currency,
+      loyaltyPointsEarned: booking.loyaltyPointsEarned,
+      loyaltyPointsRedeemed: booking.loyaltyPointsRedeemed,
+      canCancel: booking.status === "CONFIRMED",
+      event: event
+        ? {
+            title: event.title,
+            slug: event.slug,
+            venueName: event.venueName,
+            city: event.city,
+            startsAt: event.startsAt,
+          }
+        : null,
+      payment: payment
+        ? {
+            provider: payment.provider,
+            status: payment.status,
+            reference: payment.reference,
+          }
+        : null,
+    };
+  });
+}
+
 export async function confirmMockPayment(input: MockPaymentConfirmInput) {
-  if (!isMockPaymentEnabled) {
+  if (!isDemoMockPaymentAvailable) {
     throw new AppError("Mock payment is disabled.", 400, "MOCK_PAYMENT_DISABLED");
   }
 

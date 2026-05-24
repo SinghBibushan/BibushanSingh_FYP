@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import mongoose, { Types } from "mongoose";
 
 import { demoEvents, demoPromoCodes } from "../src/lib/demo-data";
+import { getTicketSaleWindow } from "../src/lib/utils";
 import { Booking } from "../src/models/Booking";
 import { Event } from "../src/models/Event";
 import { NotificationLog } from "../src/models/NotificationLog";
@@ -31,6 +32,12 @@ export const DEMO_USER = {
 };
 
 const LEGACY_DEMO_USER_EMAIL = "user@eventease.demo";
+
+export const DEMO_STAFF = {
+  name: "Venue Staff",
+  email: "staff@gmail.com",
+  password: "Password123",
+};
 
 export async function connectScriptDatabase() {
   const mongoUri = process.env.MONGODB_URI;
@@ -61,6 +68,7 @@ function makePaymentReference() {
 async function seedUsers() {
   const adminPasswordHash = await bcrypt.hash(DEMO_ADMIN.password, 10);
   const userPasswordHash = await bcrypt.hash(DEMO_USER.password, 10);
+  const staffPasswordHash = await bcrypt.hash(DEMO_STAFF.password, 10);
 
   const admin = await User.findOneAndUpdate(
     {
@@ -76,7 +84,7 @@ async function seedUsers() {
       loyaltyTier: "BRONZE",
       studentVerificationStatus: "PENDING",
     },
-    { upsert: true, new: true, setDefaultsOnInsert: true },
+    { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
   );
 
   const user = await User.findOneAndUpdate(
@@ -94,10 +102,25 @@ async function seedUsers() {
       phone: "+977-9800000000",
       studentVerificationStatus: "APPROVED",
     },
-    { upsert: true, new: true, setDefaultsOnInsert: true },
+    { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
   );
 
-  return { admin, user };
+  const staff = await User.findOneAndUpdate(
+    { email: DEMO_STAFF.email },
+    {
+      name: DEMO_STAFF.name,
+      email: DEMO_STAFF.email,
+      passwordHash: staffPasswordHash,
+      role: "STAFF",
+      emailVerifiedAt: new Date(),
+      loyaltyPoints: 0,
+      loyaltyTier: "BRONZE",
+      studentVerificationStatus: "PENDING",
+    },
+    { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
+  );
+
+  return { admin, user, staff };
 }
 
 async function seedEvents() {
@@ -129,13 +152,18 @@ async function seedEvents() {
           highlighted: demoEvent.featured,
         },
       },
-      { upsert: true, new: true, setDefaultsOnInsert: true },
+      { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
     );
 
     eventIdsBySlug.set(demoEvent.slug, event._id as Types.ObjectId);
 
     const ticketIds: Types.ObjectId[] = [];
     for (const ticketType of demoEvent.ticketTypes) {
+      const { saleStartsAt, saleEndsAt } = getTicketSaleWindow(
+        demoEvent.startsAt,
+        demoEvent.endsAt,
+      );
+
       const ticket = await TicketType.findOneAndUpdate(
         {
           eventId: event._id,
@@ -149,12 +177,12 @@ async function seedEvents() {
           currency: ticketType.currency,
           quantityTotal: ticketType.quantityTotal,
           quantitySold: ticketType.quantitySold,
-          saleStartsAt: new Date(demoEvent.startsAt),
-          saleEndsAt: new Date(demoEvent.endsAt),
+          saleStartsAt,
+          saleEndsAt,
           perUserLimit: 6,
           benefits: ticketType.benefits,
         },
-        { upsert: true, new: true, setDefaultsOnInsert: true },
+        { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
       );
 
       ticketIds.push(ticket._id as Types.ObjectId);
@@ -188,7 +216,7 @@ async function seedPromoCodes(eventIdsBySlug: Map<string, Types.ObjectId>) {
         minimumSubtotal: promo.minimumSubtotal,
         isActive: promo.isActive,
       },
-      { upsert: true, new: true, setDefaultsOnInsert: true },
+      { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
     );
   }
 }
@@ -204,7 +232,7 @@ async function seedVerification(userId: Types.ObjectId, adminId: Types.ObjectId)
       reviewedAt: new Date(),
       notes: "Approved for demo purposes.",
     },
-    { upsert: true, new: true, setDefaultsOnInsert: true },
+    { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
   );
 
   await User.findByIdAndUpdate(userId, {
@@ -219,98 +247,156 @@ async function seedDemoConfirmedBooking(input: {
   ticketTypeIds: Types.ObjectId[];
 }) {
   const event = await Event.findById(input.eventId);
+  const user = await User.findById(input.userId);
   const ticketTypes = await TicketType.find({ _id: { $in: input.ticketTypeIds } }).sort({
     price: 1,
   });
 
-  if (!event || ticketTypes.length === 0) {
+  if (!event || !user || ticketTypes.length === 0) {
     return;
   }
 
   const existing = await Booking.findOne({ userId: input.userId, eventId: input.eventId });
-  if (existing) {
-    return;
-  }
-
   const selected = ticketTypes[0];
   const subtotal = selected.price * 2;
-  const booking = await Booking.create({
-    bookingCode: makeBookingCode(),
-    userId: input.userId,
-    eventId: input.eventId,
-    ticketSelections: [
-      {
-        ticketTypeId: selected._id,
-        name: selected.name,
-        unitPrice: selected.price,
-        quantity: 2,
+  const booking =
+    existing ??
+    (await Booking.create({
+      bookingCode: makeBookingCode(),
+      userId: input.userId,
+      eventId: input.eventId,
+      ticketSelections: [
+        {
+          ticketTypeId: selected._id,
+          name: selected.name,
+          unitPrice: selected.price,
+          quantity: 2,
+        },
+      ],
+      status: "CONFIRMED",
+      pricing: {
+        subtotal,
+        discounts: [],
+        totalDiscount: 0,
+        finalAmount: subtotal,
+        currency: "NPR",
       },
-    ],
-    status: "CONFIRMED",
-    pricing: {
-      subtotal,
-      discounts: [],
-      totalDiscount: 0,
-      finalAmount: subtotal,
-      currency: "NPR",
-    },
-    studentDiscountApplied: false,
-    groupDiscountApplied: false,
-    loyaltyPointsEarned: 180,
-    loyaltyPointsRedeemed: 0,
-    confirmedAt: new Date(),
-  });
+      studentDiscountApplied: false,
+      groupDiscountApplied: false,
+      loyaltyPointsEarned: 180,
+      loyaltyPointsRedeemed: 0,
+      confirmedAt: new Date(),
+    }));
 
-  const payment = await Payment.create({
-    bookingId: booking._id,
-    provider: "MOCK",
-    status: "SUCCESS",
-    amount: subtotal,
+  booking.ticketSelections = [
+    {
+      ticketTypeId: selected._id as Types.ObjectId,
+      name: selected.name,
+      unitPrice: selected.price,
+      quantity: 2,
+    },
+  ];
+  booking.status = "CONFIRMED";
+  booking.pricing = {
+    subtotal,
+    discounts: [],
+    totalDiscount: 0,
+    finalAmount: subtotal,
     currency: "NPR",
-    reference: makePaymentReference(),
-    meta: { mode: "seed-demo" },
-    paidAt: new Date(),
-  });
+  };
+  booking.studentDiscountApplied = false;
+  booking.groupDiscountApplied = false;
+  booking.loyaltyPointsEarned = 180;
+  booking.loyaltyPointsRedeemed = 0;
+  booking.confirmedAt = booking.confirmedAt ?? new Date();
+
+  const payment = await Payment.findOneAndUpdate(
+    { bookingId: booking._id },
+    {
+      bookingId: booking._id,
+      provider: "MOCK",
+      status: "SUCCESS",
+      amount: subtotal,
+      currency: "NPR",
+      reference: makePaymentReference(),
+      meta: { mode: "seed-demo" },
+      paidAt: new Date(),
+    },
+    { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
+  );
 
   booking.paymentId = payment._id;
   await booking.save();
 
   await TicketType.findByIdAndUpdate(selected._id, {
-    $inc: { quantitySold: 2 },
+    $max: { quantitySold: 2 },
   });
 
-  for (let index = 0; index < 2; index += 1) {
+  const existingTickets = await Ticket.find({ bookingId: booking._id }).sort({ createdAt: 1 });
+
+  for (const ticket of existingTickets) {
+    ticket.ticketTypeId = selected._id as Types.ObjectId;
+    ticket.holderName = user.name;
+    ticket.qrPayload = JSON.stringify({
+      ticketCode: ticket.ticketCode,
+      bookingCode: booking.bookingCode,
+      eventTitle: event.title,
+      holderName: user.name,
+      issuedBy: "EventEase",
+    });
+    ticket.status = "ACTIVE";
+    ticket.checkedInAt = null;
+    ticket.checkedInBy = null;
+    ticket.checkInGate = "";
+    await ticket.save();
+  }
+
+  const missingTickets = Math.max(2 - existingTickets.length, 0);
+  for (let index = 0; index < missingTickets; index += 1) {
+    const ticketCode = makeTicketCode();
     await Ticket.create({
-      ticketCode: makeTicketCode(),
+      ticketCode,
       bookingId: booking._id,
       eventId: input.eventId,
       userId: input.userId,
       ticketTypeId: selected._id,
-      holderName: DEMO_USER.name,
+      holderName: user.name,
       qrPayload: JSON.stringify({
+        ticketCode,
         bookingCode: booking.bookingCode,
         eventTitle: event.title,
-        seatIndex: index + 1,
+        holderName: user.name,
+        issuedBy: "EventEase",
       }),
       pdfPath: "",
       status: "ACTIVE",
+      checkedInAt: null,
+      checkedInBy: null,
+      checkInGate: "",
       issuedAt: new Date(),
     });
   }
 
-  await NotificationLog.create({
+  const existingNotification = await NotificationLog.findOne({
     userId: input.userId,
-    channel: "EMAIL",
-    type: "BOOKING_CONFIRMED",
     subject: "Seeded booking confirmation",
-    payload: {
-      bookingCode: booking.bookingCode,
-      eventTitle: event.title,
-      message: "Demo notification created during seeding.",
-    },
-    status: "SENT",
-    sentAt: new Date(),
   });
+
+  if (!existingNotification) {
+    await NotificationLog.create({
+      userId: input.userId,
+      channel: "EMAIL",
+      type: "BOOKING_CONFIRMED",
+      subject: "Seeded booking confirmation",
+      payload: {
+        bookingCode: booking.bookingCode,
+        eventTitle: event.title,
+        message: "Demo notification created during seeding.",
+      },
+      status: "SENT",
+      sentAt: new Date(),
+    });
+  }
 }
 
 export async function seedDatabase() {
@@ -336,6 +422,8 @@ export async function seedDatabase() {
     adminPassword: DEMO_ADMIN.password,
     userEmail: DEMO_USER.email,
     userPassword: DEMO_USER.password,
+    staffEmail: DEMO_STAFF.email,
+    staffPassword: DEMO_STAFF.password,
   };
 }
 

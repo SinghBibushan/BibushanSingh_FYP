@@ -10,7 +10,7 @@ type AdminUserListItem = {
   id: string;
   name: string;
   email: string;
-  role: "USER" | "ADMIN";
+  role: "USER" | "STAFF" | "ORGANIZER" | "ADMIN";
   loyaltyPoints: number;
   loyaltyTier: string;
   createdAt: string;
@@ -24,7 +24,10 @@ export function UserManagementTable({
   const [users, setUsers] = useState(initialUsers);
   const [loading, setLoading] = useState<string | null>(null);
 
-  async function updateUserRole(userId: string, newRole: "USER" | "ADMIN") {
+  async function updateUserRole(
+    userId: string,
+    newRole: "USER" | "STAFF" | "ORGANIZER" | "ADMIN",
+  ) {
     setLoading(userId);
 
     try {
@@ -83,19 +86,25 @@ export function UserManagementTable({
       {users.map((user) => (
         <div
           key={user.id}
-          className="grid gap-4 rounded-[24px] border border-border bg-white/82 p-4 md:grid-cols-[1fr_0.7fr_0.8fr_auto]"
+          className="grid gap-4 rounded-[24px] border border-border bg-white/82 p-4 md:grid-cols-[1fr_0.8fr_0.8fr_auto]"
         >
           <div>
             <p className="font-semibold text-foreground">{user.name}</p>
             <p className="text-sm text-muted-foreground">{user.email}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {user.loyaltyTier} • {user.loyaltyPoints} pts
+              {user.loyaltyTier} - {user.loyaltyPoints} pts
             </p>
           </div>
           <div>
             <Badge
               className={
-                user.role === "ADMIN" ? "border-primary/15 bg-primary/8 text-primary" : ""
+                user.role === "ADMIN"
+                  ? "border-primary/15 bg-primary/8 text-primary"
+                  : user.role === "STAFF"
+                    ? "border-accent/15 bg-accent/8 text-accent"
+                    : user.role === "ORGANIZER"
+                      ? "border-secondary/15 bg-secondary/8 text-secondary"
+                      : ""
               }
             >
               {user.role}
@@ -106,13 +115,49 @@ export function UserManagementTable({
           </div>
           <div className="flex flex-wrap gap-2">
             {user.role === "USER" ? (
+              <>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => updateUserRole(user.id, "STAFF")}
+                  disabled={loading === user.id}
+                >
+                  Make Staff
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => updateUserRole(user.id, "ORGANIZER")}
+                  disabled={loading === user.id}
+                >
+                  Make Organizer
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => updateUserRole(user.id, "ADMIN")}
+                  disabled={loading === user.id}
+                >
+                  Make Admin
+                </Button>
+              </>
+            ) : user.role === "STAFF" ? (
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => updateUserRole(user.id, "ADMIN")}
+                onClick={() => updateUserRole(user.id, "USER")}
                 disabled={loading === user.id}
               >
-                Make Admin
+                Remove Staff
+              </Button>
+            ) : user.role === "ORGANIZER" ? (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => updateUserRole(user.id, "USER")}
+                disabled={loading === user.id}
+              >
+                Remove Organizer
               </Button>
             ) : (
               <Button

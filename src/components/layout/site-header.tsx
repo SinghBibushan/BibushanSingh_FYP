@@ -1,6 +1,6 @@
 import { getSession } from "@/lib/auth";
 import Link from "next/link";
-import { Compass, LayoutGrid, Ticket } from "lucide-react";
+import { Compass, LayoutGrid, ScanLine, Ticket } from "lucide-react";
 
 import { LogoutButton } from "@/components/auth/logout-button";
 import { NotificationBell } from "@/components/notifications/notification-bell";
@@ -17,6 +17,10 @@ export async function SiteHeader() {
           { href: "/dashboard", label: "Dashboard" },
         ]
       : []),
+    ...(session?.role === "STAFF" || session?.role === "ADMIN"
+      ? [{ href: "/staff", label: "Check-In" }]
+      : []),
+    ...(session?.role === "ORGANIZER" ? [{ href: "/organizer", label: "Organizer" }] : []),
     ...(session?.role === "ADMIN" ? [{ href: "/admin", label: "Admin" }] : []),
   ];
 
@@ -64,6 +68,22 @@ export async function SiteHeader() {
                 Dashboard
               </Link>
             ) : null}
+            {session?.role === "STAFF" || session?.role === "ADMIN" ? (
+              <Link
+                href="/staff"
+                className="rounded-full px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                Check-In
+              </Link>
+            ) : null}
+            {session?.role === "ORGANIZER" ? (
+              <Link
+                href="/organizer"
+                className="rounded-full px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                Organizer
+              </Link>
+            ) : null}
             {session?.role === "ADMIN" ? (
               <Link
                 href="/admin"
@@ -84,7 +104,13 @@ export async function SiteHeader() {
                   {session.name}
                 </p>
                 <p className="text-[0.68rem] uppercase tracking-[0.18em] text-muted-foreground">
-                  {session.role === "ADMIN" ? "Admin access" : "Active member"}
+                  {session.role === "ADMIN"
+                    ? "Admin access"
+                    : session.role === "STAFF"
+                      ? "Venue check-in"
+                    : session.role === "ORGANIZER"
+                      ? "Organizer studio"
+                      : "Active member"}
                 </p>
               </div>
               <LogoutButton />
@@ -105,7 +131,14 @@ export async function SiteHeader() {
       <div className="container-shell pb-3 md:hidden">
         <div className="flex items-center gap-2 overflow-x-auto rounded-full border border-border bg-white/72 p-2 shadow-[0_10px_30px_rgba(24,34,53,0.06)]">
           {navItems.map((item) => {
-            const Icon = item.href === "/events" ? Compass : item.href === "/tickets" ? Ticket : LayoutGrid;
+            const Icon =
+              item.href === "/events"
+                ? Compass
+                : item.href === "/tickets"
+                  ? Ticket
+                  : item.href === "/staff"
+                    ? ScanLine
+                    : LayoutGrid;
 
             return (
               <Link
