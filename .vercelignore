@@ -1,0 +1,7 @@
+.env*
+!.env.example
+.git
+.gitignore
+.next
+node_modules
+.codex-dev.*.log
