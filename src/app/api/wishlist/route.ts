@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { getErrorMessage, getErrorStatus } from "@/lib/errors";
 import { connectDB } from "@/lib/db";
+import { env } from "@/lib/env";
 import { Event } from "@/models/Event";
 import { Wishlist } from "@/models/Wishlist";
 
@@ -42,6 +43,10 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    if (!env.MONGODB_URI) {
+      return NextResponse.json({ events: [] });
+    }
+
     await connectDB();
 
     const wishlistItems = (await Wishlist.find({ userId: user.id })
@@ -66,6 +71,13 @@ export async function POST(request: NextRequest) {
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!env.MONGODB_URI) {
+      return NextResponse.json(
+        { error: "Wishlist is unavailable in demo mode." },
+        { status: 503 },
+      );
     }
 
     const { eventId } = (await request.json()) as { eventId?: string };
@@ -102,6 +114,13 @@ export async function DELETE(request: NextRequest) {
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!env.MONGODB_URI) {
+      return NextResponse.json(
+        { error: "Wishlist is unavailable in demo mode." },
+        { status: 503 },
+      );
     }
 
     const { searchParams } = new URL(request.url);

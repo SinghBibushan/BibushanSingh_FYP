@@ -16,7 +16,6 @@ export default async function AdminReportsPage() {
       title="Sales summary"
       description="Operational reporting presented in a more polished, decision-oriented layout."
       navItems={adminNavItems}
-      currentPath="/admin/reports"
     >
       <div className="space-y-5">
         <div className="grid gap-5 md:grid-cols-3">
@@ -90,7 +89,7 @@ export default async function AdminReportsPage() {
               </div>
               <div className="rounded-[22px] border border-border bg-white/82 p-4 text-sm leading-7 text-muted-foreground">
                 Each confirmed attendee receives both an in-app notification and an email/log
-                entry, making the communication flow visible in the viva.
+                entry, making the communication workflow traceable for operations review.
               </div>
               <div className="rounded-[22px] border border-border bg-white/82 p-4 text-sm leading-7 text-muted-foreground">
                 Duplicate reminders are blocked by checking existing reminder records for the same

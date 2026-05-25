@@ -21,7 +21,6 @@ export default async function OrganizerEventsPage() {
       title="Create and submit events"
       description="Manage drafts, re-submit rejected listings, and monitor how approved events are performing."
       navItems={organizerNavItems}
-      currentPath="/organizer/events"
     >
       <div className="space-y-5">
         <div className="grid gap-5 md:grid-cols-2">

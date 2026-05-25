@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
+import { env } from "@/lib/env";
 import { Notification } from "@/models/Notification";
 import { verifyAuth } from "@/lib/auth";
 
@@ -7,6 +8,10 @@ export async function GET(req: NextRequest) {
   try {
     const user = await verifyAuth(req);
     if (!user) {
+      return NextResponse.json({ notifications: [], unreadCount: 0 });
+    }
+
+    if (!env.MONGODB_URI) {
       return NextResponse.json({ notifications: [], unreadCount: 0 });
     }
 
@@ -34,6 +39,10 @@ export async function PATCH(req: NextRequest) {
     const user = await verifyAuth(req);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!env.MONGODB_URI) {
+      return NextResponse.json({ success: true, mode: "noop" });
     }
 
     await connectToDatabase();

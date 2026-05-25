@@ -2,17 +2,17 @@ import { ShieldCheck, Sparkles, Ticket } from "lucide-react";
 
 const benefits = [
   {
-    title: "Session-based security",
-    description: "JWT cookies keep the flow simple while preserving role-aware access control.",
+    title: "Secure sign-in",
+    description: "JWT session cookies keep access simple while preserving role-aware permissions.",
     icon: ShieldCheck,
   },
   {
-    title: "Verification that fits the demo",
-    description: "Email verification and password resets remain reliable with or without SMTP.",
+    title: "Reliable verification",
+    description: "Email verification and password reset flows stay demo-ready and production-friendly.",
     icon: Sparkles,
   },
   {
-    title: "Ready for booking flows",
+    title: "Ready to book",
     description: "Users move directly from authentication into events, tickets, and loyalty.",
     icon: Ticket,
   },

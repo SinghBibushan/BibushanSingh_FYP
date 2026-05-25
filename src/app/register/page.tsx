@@ -19,8 +19,8 @@ export default async function RegisterPage() {
         <div className="opacity-0 animate-slide-in-left">
           <AuthPanel
             eyebrow="Registration"
-            title="Create an account that is immediately ready for live booking flows."
-            description="New users move into a polished onboarding path with verification, account security, and direct access to tickets, loyalty, and future event activity."
+            title="Create your EventEase account."
+            description="Register once to book events, receive updates, and access your dashboard, tickets, and rewards."
           />
         </div>
         <div className="opacity-0 animate-slide-in-right delay-200">

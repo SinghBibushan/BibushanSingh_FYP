@@ -1,10 +1,13 @@
 import { AppShell } from "@/components/layout/app-shell";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { SectionHeader } from "@/components/ui/section-header";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { adminNavItems } from "@/lib/admin-nav";
 import { requireAdmin } from "@/lib/auth";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { listAdminBookings } from "@/server/admin/service";
+import { ReceiptText } from "lucide-react";
 
 export default async function AdminBookingsPage() {
   await requireAdmin();
@@ -16,15 +19,20 @@ export default async function AdminBookingsPage() {
       title="Booking activity"
       description="Review booking flow output with cleaner hierarchy for status, user, event, and total."
       navItems={adminNavItems}
-      currentPath="/admin/bookings"
     >
-      <Card className="bg-white/78">
+      <Card className="bg-white/90">
         <CardContent className="space-y-4">
-          <h2 className="text-3xl leading-none">Bookings</h2>
+          <SectionHeader
+            badge="Bookings"
+            title="Platform booking activity"
+            description="Review booking volume, user ownership, event associations, and order totals."
+          />
           {bookings.length === 0 ? (
-            <div className="rounded-[22px] border border-border bg-white/82 p-5 text-sm text-muted-foreground">
-              No bookings available yet. Create and confirm a booking to populate this list.
-            </div>
+            <EmptyState
+              icon={ReceiptText}
+              title="No bookings available yet"
+              description="Create and confirm a booking to populate this list."
+            />
           ) : (
             <div className="space-y-3">
               {bookings.map((booking) => (
@@ -34,7 +42,19 @@ export default async function AdminBookingsPage() {
                 >
                   <div>
                     <p className="font-semibold text-foreground">{booking.bookingCode}</p>
-                    <Badge>{booking.status}</Badge>
+                    <div className="mt-2">
+                      <StatusBadge
+                        tone={
+                          booking.status === "CONFIRMED"
+                            ? "success"
+                            : booking.status === "CANCELLED"
+                              ? "danger"
+                              : "warning"
+                        }
+                      >
+                        {booking.status}
+                      </StatusBadge>
+                    </div>
                   </div>
                   <div className="text-sm text-muted-foreground">{booking.userName}</div>
                   <div className="text-sm text-muted-foreground">{booking.eventTitle}</div>

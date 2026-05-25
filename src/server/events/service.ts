@@ -33,6 +33,11 @@ function toTicketView(ticket: {
 }
 
 function toDemoEventListItem(event: DemoEvent): EventListItem {
+  const ticketsRemaining = event.ticketTypes.reduce(
+    (sum, ticket) => sum + Math.max(ticket.quantityTotal - ticket.quantitySold, 0),
+    0,
+  );
+
   return {
     id: event.id,
     _id: event.id,
@@ -50,6 +55,7 @@ function toDemoEventListItem(event: DemoEvent): EventListItem {
     tags: event.tags,
     priceFrom: event.priceFrom,
     ticketCount: event.ticketTypes.length,
+    ticketsRemaining,
   };
 }
 
@@ -106,6 +112,10 @@ async function getDbEvents(): Promise<EventListItem[]> {
       eventTickets.length > 0
         ? Math.min(...eventTickets.map((ticket) => ticket.price))
         : 0;
+    const ticketsRemaining = eventTickets.reduce(
+      (sum, ticket) => sum + Math.max(ticket.quantityTotal - ticket.quantitySold, 0),
+      0,
+    );
 
     return {
       id: String(event._id),
@@ -124,6 +134,7 @@ async function getDbEvents(): Promise<EventListItem[]> {
       tags: event.tags ?? [],
       priceFrom,
       ticketCount: eventTickets.length,
+      ticketsRemaining,
     };
   });
 }
@@ -178,6 +189,10 @@ async function getDbEventBySlug(slug: string): Promise<EventDetail | null> {
         ? Math.min(...ticketViews.map((ticket) => ticket.price))
         : 0,
     ticketCount: ticketViews.length,
+    ticketsRemaining: ticketViews.reduce(
+      (sum, ticket) => sum + Math.max(ticket.quantityRemaining, 0),
+      0,
+    ),
     ticketTypes: ticketViews,
   };
 }

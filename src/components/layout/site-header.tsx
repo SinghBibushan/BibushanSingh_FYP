@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Compass, LayoutGrid, ScanLine, Ticket } from "lucide-react";
 
 import { LogoutButton } from "@/components/auth/logout-button";
+import { NavLink } from "@/components/layout/nav-link";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { Button } from "@/components/ui/button";
 
@@ -25,81 +26,88 @@ export async function SiteHeader() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/70 bg-background/88 backdrop-blur-xl">
-      <div className="container-shell flex h-20 items-center justify-between gap-4">
-        <Link href="/" className="flex shrink-0 items-center gap-3">
+    <header className="sticky top-0 z-40 border-b border-border/70 bg-background/90 backdrop-blur-xl">
+      <div className="container-shell flex min-h-18 items-center justify-between gap-3 py-3 sm:h-20 sm:py-0">
+        <Link href="/" className="flex min-w-0 shrink items-center gap-3">
           <div className="min-w-0">
-            <p className="font-heading text-xl leading-none sm:text-[1.7rem]">EventEase</p>
+            <p className="truncate font-heading text-lg leading-none sm:text-[1.7rem]">EventEase</p>
             <p className="hidden text-[0.7rem] uppercase tracking-[0.28em] text-muted-foreground sm:block">
-              Curated Ticketing Platform
+              Curated Ticketing For Nepal
             </p>
           </div>
         </Link>
 
         <nav className="hidden min-w-0 flex-1 items-center justify-center md:flex">
-          <div className="flex items-center gap-2 rounded-full border border-border bg-white/72 p-2 shadow-[0_10px_30px_rgba(24,34,53,0.06)]">
-            <Link
+          <div className="flex items-center gap-1 rounded-2xl border border-border bg-white/88 p-1.5 shadow-[0_10px_30px_rgba(24,32,51,0.06)]">
+            <NavLink
               href="/events"
-              className="rounded-full px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
+              activeClassName="bg-primary text-primary-foreground shadow-sm"
+              className="rounded-xl px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
             >
               Events
-            </Link>
+            </NavLink>
             {session ? (
-              <Link
+              <NavLink
                 href="/tickets"
-                className="rounded-full px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
+                activeClassName="bg-primary text-primary-foreground shadow-sm"
+                className="rounded-xl px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 My Tickets
-              </Link>
+              </NavLink>
             ) : null}
             {session ? (
-              <Link
+              <NavLink
                 href="/loyalty"
-                className="rounded-full px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
+                activeClassName="bg-primary text-primary-foreground shadow-sm"
+                className="rounded-xl px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 Loyalty
-              </Link>
+              </NavLink>
             ) : null}
             {session ? (
-              <Link
+              <NavLink
                 href="/dashboard"
-                className="rounded-full px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
+                activeClassName="bg-primary text-primary-foreground shadow-sm"
+                className="rounded-xl px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 Dashboard
-              </Link>
+              </NavLink>
             ) : null}
             {session?.role === "STAFF" || session?.role === "ADMIN" ? (
-              <Link
+              <NavLink
                 href="/staff"
-                className="rounded-full px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
+                activeClassName="bg-primary text-primary-foreground shadow-sm"
+                className="rounded-xl px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 Check-In
-              </Link>
+              </NavLink>
             ) : null}
             {session?.role === "ORGANIZER" ? (
-              <Link
+              <NavLink
                 href="/organizer"
-                className="rounded-full px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
+                activeClassName="bg-primary text-primary-foreground shadow-sm"
+                className="rounded-xl px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 Organizer
-              </Link>
+              </NavLink>
             ) : null}
             {session?.role === "ADMIN" ? (
-              <Link
+              <NavLink
                 href="/admin"
-                className="rounded-full px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
+                activeClassName="bg-primary text-primary-foreground shadow-sm"
+                className="rounded-xl px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 Admin
-              </Link>
+              </NavLink>
             ) : null}
           </div>
         </nav>
 
-        <div className="flex shrink-0 items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {session ? (
             <>
               <NotificationBell />
-              <div className="hidden rounded-full border border-border bg-white/72 px-4 py-2 text-sm shadow-[0_8px_24px_rgba(24,34,53,0.05)] sm:block">
+              <div className="hidden rounded-2xl border border-border bg-white/88 px-4 py-2 text-sm shadow-[0_8px_24px_rgba(24,32,51,0.05)] sm:block">
                 <p className="max-w-[11rem] truncate font-semibold text-foreground">
                   {session.name}
                 </p>
@@ -120,7 +128,7 @@ export async function SiteHeader() {
               <Button asChild variant="ghost" className="hidden sm:inline-flex">
                 <Link href="/login">Log in</Link>
               </Button>
-              <Button asChild>
+              <Button asChild size="sm" className="sm:h-11 sm:px-5 sm:text-sm">
                 <Link href="/register">Get Started</Link>
               </Button>
             </>
@@ -129,7 +137,7 @@ export async function SiteHeader() {
       </div>
 
       <div className="container-shell pb-3 md:hidden">
-        <div className="flex items-center gap-2 overflow-x-auto rounded-full border border-border bg-white/72 p-2 shadow-[0_10px_30px_rgba(24,34,53,0.06)]">
+        <div className="grid grid-cols-2 gap-2 rounded-2xl border border-border bg-white/88 p-2 shadow-[0_10px_30px_rgba(24,32,51,0.06)] sm:grid-cols-3">
           {navItems.map((item) => {
             const Icon =
               item.href === "/events"
@@ -141,14 +149,15 @@ export async function SiteHeader() {
                     : LayoutGrid;
 
             return (
-              <Link
+              <NavLink
                 key={item.href}
                 href={item.href}
-                className="inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
+                activeClassName="bg-primary text-primary-foreground shadow-sm"
+                className="inline-flex min-w-0 items-center justify-center gap-2 rounded-xl px-3 py-2 text-center text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 <Icon className="h-4 w-4" />
                 {item.label}
-              </Link>
+              </NavLink>
             );
           })}
         </div>

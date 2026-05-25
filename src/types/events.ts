@@ -30,6 +30,7 @@ export type EventListItem = {
   tags: string[];
   priceFrom: number;
   ticketCount: number;
+  ticketsRemaining: number;
 };
 
 export type EventDetail = EventListItem & {

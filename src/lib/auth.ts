@@ -17,6 +17,15 @@ export type SessionPayload = {
   name: string;
 };
 
+type SessionBackedUser = SessionPayload & {
+  id: string;
+  loyaltyPoints: number;
+  loyaltyTier: string;
+  studentVerificationStatus: "PENDING";
+  emailVerifiedAt: null;
+  phone: string;
+};
+
 type ActionTokenPayload = {
   email: string;
   purpose: "verify-email" | "reset-password";
@@ -51,6 +60,19 @@ function normalizeUser<T extends { _id: unknown }>(user: T | null) {
     ...user,
     _id: id,
     id,
+  };
+}
+
+function createSessionBackedUser(session: SessionPayload): SessionBackedUser {
+  return {
+    ...session,
+    _id: session.sub,
+    id: session.sub,
+    loyaltyPoints: 0,
+    loyaltyTier: "BRONZE",
+    studentVerificationStatus: "PENDING",
+    emailVerifiedAt: null,
+    phone: "",
   };
 }
 
@@ -139,6 +161,10 @@ export async function getCurrentUser() {
     return null;
   }
 
+  if (!env.MONGODB_URI) {
+    return createSessionBackedUser(session);
+  }
+
   await connectToDatabase();
   const user = await User.findById(session.sub).lean();
   return normalizeUser(user);
@@ -195,6 +221,11 @@ export async function verifyAuth(req: CookieRequest) {
 
   try {
     const payload = jwt.verify(token, env.JWT_SECRET) as SessionPayload;
+
+    if (!env.MONGODB_URI) {
+      return createSessionBackedUser(payload);
+    }
+
     await connectToDatabase();
     const user = await User.findById(payload.sub).lean();
     return normalizeUser(user);

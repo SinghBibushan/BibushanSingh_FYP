@@ -18,7 +18,6 @@ export default async function AdminVerificationsPage() {
       title="Student verification review"
       description="Approve or reject student discount eligibility from a clearer review queue."
       navItems={adminNavItems}
-      currentPath="/admin/verifications"
     >
       <div className="space-y-5">
         <div className="grid gap-5 md:grid-cols-2">

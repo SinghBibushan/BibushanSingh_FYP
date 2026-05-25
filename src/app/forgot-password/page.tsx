@@ -9,8 +9,8 @@ export default function ForgotPasswordPage() {
       <main className="container-shell grid min-h-[calc(100vh-5rem)] items-center gap-8 py-14 lg:grid-cols-[0.95fr_1.05fr]">
         <AuthPanel
           eyebrow="Recovery"
-          title="Password reset that works online or fully in mock demo mode."
-          description="If SMTP is absent, the generated reset link is exposed directly in the UI so the viva flow remains smooth and fully demonstrable."
+          title="Password reset that works with SMTP or the local mock mail flow."
+          description="If SMTP is not configured, the generated reset link is surfaced in the interface so the flow remains testable during development."
         />
         <div className="flex justify-center lg:justify-end">
           <ForgotPasswordForm />

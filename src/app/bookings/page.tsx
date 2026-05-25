@@ -3,8 +3,10 @@ import { ArrowRight, ReceiptText, Ticket } from "lucide-react";
 
 import { CancelBookingButton } from "@/components/bookings/cancel-booking-button";
 import { AppShell } from "@/components/layout/app-shell";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { SectionHeader } from "@/components/ui/section-header";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { requireUser } from "@/lib/auth";
 import { userNavItems } from "@/lib/user-nav";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -20,44 +22,33 @@ export default async function BookingsPage() {
       title="Booking history"
       description="Track booking state changes from order creation through payment, confirmation, and cancellation."
       navItems={userNavItems}
-      currentPath="/bookings"
     >
       {bookings.length === 0 ? (
-        <Card className="bg-white/78">
-          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-border bg-white">
-              <ReceiptText className="h-10 w-10 text-secondary" />
-            </div>
-            <h2 className="text-3xl font-semibold leading-none text-foreground">
-              No bookings yet
-            </h2>
-            <p className="mt-3 max-w-md text-sm leading-7 text-muted-foreground">
-              Create a booking from the event catalogue to start the payment, ticketing, and
-              loyalty lifecycle.
-            </p>
+        <EmptyState
+          icon={ReceiptText}
+          title="No bookings yet"
+          description="Create a booking from the event catalogue to start the payment, ticketing, and loyalty flow."
+          action={
             <Link
               href="/events"
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground shadow-[0_14px_30px_rgba(24,34,53,0.16)]"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground shadow-[0_14px_30px_rgba(24,32,51,0.16)]"
             >
-              Browse events
+              Browse Events
               <ArrowRight className="h-4 w-4" />
             </Link>
-          </CardContent>
-        </Card>
+          }
+        />
       ) : (
         <div className="space-y-5">
-          <div className="rounded-[28px] border border-border bg-white/72 px-6 py-4">
-            <p className="text-[0.72rem] uppercase tracking-[0.22em] text-muted-foreground">
-              Booking lifecycle
-            </p>
-            <p className="mt-2 text-3xl font-semibold leading-none text-foreground">
-              {bookings.length} {bookings.length === 1 ? "booking" : "bookings"}
-            </p>
-          </div>
+          <SectionHeader
+            badge="Booking Lifecycle"
+            title={`${bookings.length} ${bookings.length === 1 ? "booking" : "bookings"}`}
+            description="Track booking progress from creation to payment and ticket delivery."
+          />
 
           <div className="space-y-4">
             {bookings.map((booking) => (
-              <Card key={booking.id} className="bg-white/78">
+              <Card key={booking.id} className="bg-white/90">
                 <CardContent className="space-y-5">
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div className="space-y-3">
@@ -65,29 +56,29 @@ export default async function BookingsPage() {
                         <p className="text-2xl font-semibold leading-none text-foreground">
                           {booking.bookingCode}
                         </p>
-                        <Badge
-                          className={
+                        <StatusBadge
+                          tone={
                             booking.status === "CONFIRMED"
-                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                              ? "success"
                               : booking.status === "CANCELLED"
-                                ? "border-red-200 bg-red-50 text-red-700"
-                                : ""
+                                ? "danger"
+                                : "warning"
                           }
                         >
                           {booking.status}
-                        </Badge>
+                        </StatusBadge>
                         {booking.payment ? (
-                          <Badge
-                            className={
+                          <StatusBadge
+                            tone={
                               booking.payment.status === "SUCCESS"
-                                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                                ? "success"
                                 : booking.payment.status === "REFUNDED"
-                                  ? "border-amber-200 bg-amber-50 text-amber-700"
-                                  : ""
+                                  ? "warning"
+                                  : "info"
                             }
                           >
                             Payment: {booking.payment.status}
-                          </Badge>
+                          </StatusBadge>
                         ) : null}
                       </div>
 

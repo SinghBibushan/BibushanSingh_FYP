@@ -18,7 +18,6 @@ export default async function AdminUsersPage() {
       title="User management"
       description="Promote, review, and remove accounts from a more structured administration surface."
       navItems={adminNavItems}
-      currentPath="/admin/users"
     >
       <div className="space-y-5">
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">

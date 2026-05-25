@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   Award,
+  CalendarClock,
   CheckCircle2,
   Heart,
   Ticket,
@@ -10,6 +11,9 @@ import {
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Card, CardContent } from "@/components/ui/card";
+import { SectionHeader } from "@/components/ui/section-header";
+import { StatCard } from "@/components/ui/stat-card";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { getCurrentUser, requireUser } from "@/lib/auth";
 import { userNavItems } from "@/lib/user-nav";
 
@@ -21,26 +25,30 @@ export default async function DashboardPage() {
     {
       title: "Loyalty tier",
       value: user?.loyaltyTier ?? "Bronze",
-      note: "Your status grows with consistent confirmed bookings.",
+      note: "Your status grows with confirmed bookings.",
       icon: Award,
-      tone: "text-secondary",
-      surface: "bg-[linear-gradient(145deg,#faf3ea_0%,#f4eadf_100%)]",
+      tone: "amber",
     },
     {
       title: "Points balance",
       value: String(user?.loyaltyPoints ?? 0),
-      note: "Redeem points on upcoming bookings when available.",
+      note: "Redeem points on eligible future bookings.",
       icon: TrendingUp,
-      tone: "text-accent",
-      surface: "bg-[linear-gradient(145deg,#eef5f3_0%,#e7efec_100%)]",
+      tone: "emerald",
     },
     {
       title: "Account status",
       value: user?.emailVerifiedAt ? "Verified" : "Pending",
-      note: "Email verification keeps booking and account recovery flows safer.",
+      note: "Email verification keeps bookings and recovery secure.",
       icon: CheckCircle2,
-      tone: "text-primary",
-      surface: "bg-[linear-gradient(145deg,#f5f4f0_0%,#ece9e2_100%)]",
+      tone: "indigo",
+    },
+    {
+      title: "Next step",
+      value: "Browse events",
+      note: "Pick an event, review tickets, and complete checkout.",
+      icon: CalendarClock,
+      tone: "slate",
     },
   ];
 
@@ -50,45 +58,22 @@ export default async function DashboardPage() {
       title={`Welcome back, ${user?.name?.split(" ")[0] ?? "Guest"}`}
       description="A clearer operational view of your account, rewards, saved events, and ticket activity."
       navItems={userNavItems}
-      currentPath="/dashboard"
     >
       <div className="space-y-6">
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           {cards.map((card) => {
-            const Icon = card.icon;
-
-            return (
-              <Card key={card.title} className="hover-lift overflow-hidden bg-white/78">
-                <CardContent className={`space-y-4 ${card.surface}`}>
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                        {card.title}
-                      </p>
-                      <p className="mt-3 text-3xl font-semibold leading-none text-foreground">
-                        {card.value}
-                      </p>
-                    </div>
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-border bg-white/82">
-                      <Icon className={`h-5 w-5 ${card.tone}`} />
-                    </div>
-                  </div>
-                  <p className="text-sm leading-7 text-muted-foreground">{card.note}</p>
-                </CardContent>
-              </Card>
-            );
+            return <StatCard key={card.title} label={card.title} value={card.value} note={card.note} icon={card.icon} tone={card.tone as "amber" | "emerald" | "indigo" | "slate"} />;
           })}
         </div>
 
         <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-          <Card className="bg-white/78">
+          <Card className="bg-white/90">
             <CardContent className="space-y-5">
-              <div>
-                <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-secondary">
-                  Account snapshot
-                </p>
-                <h2 className="mt-3 text-3xl leading-none">Your current account standing</h2>
-              </div>
+              <SectionHeader
+                badge="Account Snapshot"
+                title="Your current account standing"
+                description="Key account details are grouped here so you can review status quickly before taking action."
+              />
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-[24px] border border-border bg-white/82 p-4">
                   <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
@@ -100,9 +85,11 @@ export default async function DashboardPage() {
                   <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                     Verification
                   </p>
-                  <p className="mt-2 font-semibold text-foreground">
-                    {user?.emailVerifiedAt ? "Email verified" : "Verification pending"}
-                  </p>
+                  <div className="mt-2">
+                    <StatusBadge tone={user?.emailVerifiedAt ? "success" : "warning"}>
+                      {user?.emailVerifiedAt ? "Email verified" : "Verification pending"}
+                    </StatusBadge>
+                  </div>
                 </div>
                 <div className="rounded-[24px] border border-border bg-white/82 p-4">
                   <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
@@ -122,14 +109,13 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/78">
+          <Card className="bg-white/90">
             <CardContent className="space-y-5">
-              <div>
-                <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-secondary">
-                  Quick actions
-                </p>
-                <h2 className="mt-3 text-3xl leading-none">Move into the next flow</h2>
-              </div>
+              <SectionHeader
+                badge="Quick Actions"
+                title="Move into the next flow"
+                description="Shortcuts for the pages you are most likely to revisit."
+              />
               <div className="space-y-3">
                 {[
                   {

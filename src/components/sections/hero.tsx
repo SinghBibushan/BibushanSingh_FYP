@@ -19,21 +19,20 @@ export function HeroSection() {
   const categoryCount = new Set(demoEvents.map((event) => event.category)).size;
 
   return (
-    <section className="surface-grid relative overflow-hidden py-16 md:py-24">
+    <section className="surface-grid relative overflow-hidden py-12 md:py-20">
       <div className="hero-orb" />
 
       <div className="container-shell grid gap-10 lg:grid-cols-[1.15fr_0.85fr]">
         <div className="space-y-8 opacity-0 animate-slide-in-left">
-          <Badge className="bg-white/80 text-primary">Professional event booking</Badge>
+          <Badge className="bg-white text-primary">Curated event ticketing</Badge>
 
           <div className="max-w-3xl space-y-6">
             <h1 className="text-5xl leading-[0.92] tracking-tight md:text-7xl opacity-0 animate-fade-in delay-100">
-              Find, book, and manage premium event experiences with clarity.
+              Discover and book standout events across Nepal.
             </h1>
             <p className="max-w-2xl text-lg leading-8 text-muted-foreground md:text-xl opacity-0 animate-fade-in delay-200">
-              EventEase brings discovery, booking, verification, loyalty, and admin
-              control into one composed workflow for venues, organisers, and attendees
-              across Nepal.
+              EventEase brings event discovery, booking, loyalty, and operations into one
+              polished platform for attendees, organizers, staff, and administrators.
             </p>
           </div>
 
@@ -68,7 +67,7 @@ export function HeroSection() {
             </div>
             <div className="rounded-[26px] border border-border bg-white/70 p-5 shadow-[0_14px_36px_rgba(24,34,53,0.05)]">
               <p className="text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground">
-                Booking stack
+                Platform status
               </p>
               <p className="mt-3 text-3xl font-semibold leading-none text-foreground">
                 Live
@@ -142,8 +141,8 @@ export function HeroSection() {
               </div>
               <div className="rounded-[22px] border border-border bg-white/66 p-4">
                 <MapPin className="mb-3 h-5 w-5 text-primary" />
-                <p className="font-semibold text-foreground">Local relevance</p>
-                <p className="mt-1 leading-6">Flows shaped around Nepal event operations.</p>
+                <p className="font-semibold text-foreground">Built for Nepal</p>
+                <p className="mt-1 leading-6">A local event workflow for discovery and operations.</p>
               </div>
             </div>
 

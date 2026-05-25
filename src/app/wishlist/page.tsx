@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireUser } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
+import { env } from "@/lib/env";
 import { userNavItems } from "@/lib/user-nav";
 import { formatDate } from "@/lib/utils";
 import { Wishlist } from "@/models/Wishlist";
@@ -29,23 +30,26 @@ type WishlistRecord = {
 
 export default async function WishlistPage() {
   const user = await requireUser();
+  let events: Array<WishlistEvent & { savedAt: string }> = [];
 
-  await connectDB();
+  if (env.MONGODB_URI) {
+    await connectDB();
 
-  const wishlistItems = (await Wishlist.find({ userId: user.sub })
-    .populate({
-      path: "eventId",
-      select: "title slug summary category city venueName startsAt tags",
-    })
-    .sort({ createdAt: -1 })
-    .lean()) as WishlistRecord[];
+    const wishlistItems = (await Wishlist.find({ userId: user.sub })
+      .populate({
+        path: "eventId",
+        select: "title slug summary category city venueName startsAt tags",
+      })
+      .sort({ createdAt: -1 })
+      .lean()) as WishlistRecord[];
 
-  const events = wishlistItems
-    .filter((item) => item.eventId)
-    .map((item) => ({
-      ...(item.eventId as WishlistEvent),
-      savedAt: item.createdAt.toISOString(),
-    }));
+    events = wishlistItems
+      .filter((item) => item.eventId)
+      .map((item) => ({
+        ...(item.eventId as WishlistEvent),
+        savedAt: item.createdAt.toISOString(),
+      }));
+  }
 
   return (
     <AppShell
@@ -53,7 +57,6 @@ export default async function WishlistPage() {
       title="Saved events"
       description="A calmer planning space for events you want to revisit before committing to checkout."
       navItems={userNavItems}
-      currentPath="/wishlist"
     >
       {events.length === 0 ? (
         <Card className="bg-white/78">

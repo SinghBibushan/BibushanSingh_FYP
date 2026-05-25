@@ -4,6 +4,8 @@ import { CheckInConsole } from "@/components/staff/check-in-console";
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { SectionHeader } from "@/components/ui/section-header";
+import { StatCard } from "@/components/ui/stat-card";
 import { requireStaffAccess } from "@/lib/auth";
 import { staffNavItems } from "@/lib/staff-nav";
 import { formatDate } from "@/lib/utils";
@@ -26,45 +28,39 @@ export default async function StaffPage() {
       title="Staff check-in console"
       description={`Signed in as ${session.name}. Validate QR payloads or ticket codes, stop duplicate entry, and monitor venue-entry activity in real time.`}
       navItems={staffNavItems}
-      currentPath="/staff"
     >
       <div className="space-y-6">
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           {dashboard.metrics.map((metric) => {
             const Icon = metricIconMap[metric.label] ?? Activity;
+            const tone =
+              metric.label === "Today denied"
+                ? "amber"
+                : metric.label === "Checked in" || metric.label === "Today success"
+                  ? "emerald"
+                  : "indigo";
 
             return (
-              <Card key={metric.label} className="bg-white/78">
-                <CardContent className="space-y-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-[0.72rem] uppercase tracking-[0.22em] text-muted-foreground">
-                        {metric.label}
-                      </p>
-                      <p className="mt-3 text-3xl font-semibold leading-none text-foreground">
-                        {metric.value}
-                      </p>
-                    </div>
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-border bg-white/82">
-                      <Icon className="h-5 w-5 text-primary" />
-                    </div>
-                  </div>
-                  <p className="text-sm leading-7 text-muted-foreground">{metric.note}</p>
-                </CardContent>
-              </Card>
+              <StatCard
+                key={metric.label}
+                label={metric.label}
+                value={metric.value}
+                note={metric.note}
+                icon={Icon}
+                tone={tone}
+              />
             );
           })}
         </div>
 
         <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
-          <Card className="bg-white/78">
+          <Card className="bg-white/90">
             <CardContent className="space-y-5">
-              <div>
-                <p className="text-[0.72rem] uppercase tracking-[0.22em] text-secondary">
-                  Entry workflow
-                </p>
-                <h2 className="mt-3 text-3xl leading-none">Scan or paste ticket data</h2>
-              </div>
+              <SectionHeader
+                badge="Entry Workflow"
+                title="Scan or paste ticket data"
+                description="Staff can scan the QR payload or enter the visible ticket code manually."
+              />
               <p className="text-sm leading-7 text-muted-foreground">
                 Paste the QR payload produced by the ticket vault or enter the visible ticket code
                 manually. Successful scans mark the ticket as used, while duplicate or invalid
@@ -74,14 +70,13 @@ export default async function StaffPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/78">
+          <Card className="bg-white/90">
             <CardContent className="space-y-4">
-              <div>
-                <p className="text-[0.72rem] uppercase tracking-[0.22em] text-secondary">
-                  Recent venue activity
-                </p>
-                <h2 className="mt-3 text-3xl leading-none">Latest scans</h2>
-              </div>
+              <SectionHeader
+                badge="Recent Venue Activity"
+                title="Latest scans"
+                description="Recent ticket scans are listed here for quick venue-side review."
+              />
               <div className="space-y-3">
                 {dashboard.recentLogs.length === 0 ? (
                   <div className="rounded-[22px] border border-border bg-white/82 p-4 text-sm text-muted-foreground">

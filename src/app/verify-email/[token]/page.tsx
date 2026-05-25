@@ -16,7 +16,7 @@ export default async function VerifyEmailPage({
         <AuthPanel
           eyebrow="Email verification"
           title="Verification is built into the product flow, not treated as an afterthought."
-          description="For viva use, verification works through mock email links or SMTP without any code changes."
+          description="Verification works through SMTP when configured, or through the built-in mock mail flow for local testing."
         />
         <div className="flex justify-center lg:justify-end">
           <VerifyEmailCard token={token} />

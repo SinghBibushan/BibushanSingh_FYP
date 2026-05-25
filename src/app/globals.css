@@ -3,19 +3,19 @@
 :root {
   --font-body: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
   --font-heading: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
-  --background: #f4efe7;
-  --foreground: #182235;
-  --card: rgba(252, 248, 241, 0.9);
-  --card-foreground: #182235;
-  --muted: #e8e0d3;
-  --muted-foreground: #6a6d73;
-  --primary: #182235;
-  --primary-foreground: #fefcf8;
-  --secondary: #b3733f;
-  --secondary-foreground: #fff8ef;
-  --accent: #2f6668;
-  --border: rgba(24, 34, 53, 0.12);
-  --ring: rgba(47, 102, 104, 0.28);
+  --background: #f7f8fc;
+  --foreground: #182033;
+  --card: rgba(255, 255, 255, 0.92);
+  --card-foreground: #182033;
+  --muted: #eef2f7;
+  --muted-foreground: #5f6b7d;
+  --primary: #182846;
+  --primary-foreground: #f8fafc;
+  --secondary: #3e63dd;
+  --secondary-foreground: #f8fbff;
+  --accent: #0f8b6d;
+  --border: rgba(24, 32, 51, 0.1);
+  --ring: rgba(62, 99, 221, 0.22);
 }
 
 @theme inline {
@@ -47,12 +47,13 @@ html {
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(179, 115, 63, 0.1), transparent 34%),
-    radial-gradient(circle at 85% 15%, rgba(47, 102, 104, 0.1), transparent 28%),
-    linear-gradient(180deg, #fbf8f2 0%, #f4efe7 44%, #efe8dd 100%);
+    radial-gradient(circle at top left, rgba(62, 99, 221, 0.08), transparent 28%),
+    radial-gradient(circle at 88% 12%, rgba(15, 139, 109, 0.08), transparent 24%),
+    linear-gradient(180deg, #fbfcff 0%, #f6f8fc 44%, #f1f5fb 100%);
   color: var(--foreground);
   font-family: var(--font-body), sans-serif;
   text-rendering: optimizeLegibility;
+  overflow-x: clip;
 }
 
 h1,
@@ -111,8 +112,8 @@ textarea {
   height: 24rem;
   width: 24rem;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgba(179, 115, 63, 0.18), transparent 70%);
-  filter: blur(12px);
+  background: radial-gradient(circle, rgba(62, 99, 221, 0.16), transparent 70%);
+  filter: blur(18px);
 }
 
 @keyframes fadeIn {
@@ -201,17 +202,17 @@ textarea {
 
 .glass-card {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(252, 248, 241, 0.84)),
-    rgba(252, 248, 241, 0.88);
-  border: 1px solid rgba(24, 34, 53, 0.1);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(248, 250, 255, 0.94)),
+    rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(24, 32, 51, 0.08);
   box-shadow:
-    0 22px 60px rgba(24, 34, 53, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    0 24px 70px rgba(24, 32, 51, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(14px);
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #182235 0%, #2f6668 48%, #b3733f 100%);
+  background: linear-gradient(135deg, #182846 0%, #3e63dd 55%, #0f8b6d 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -225,8 +226,8 @@ textarea {
 }
 
 .hover-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 24px 50px rgba(24, 34, 53, 0.11);
+  transform: translateY(-3px);
+  box-shadow: 0 22px 46px rgba(24, 32, 51, 0.1);
 }
 
 .shimmer {
@@ -251,25 +252,36 @@ textarea {
 }
 
 .neon-glow {
-  box-shadow: 0 20px 50px rgba(24, 34, 53, 0.1);
+  box-shadow: 0 20px 50px rgba(24, 32, 51, 0.1);
 }
 
 .event-gradient-purple {
-  background: linear-gradient(135deg, #22324f 0%, #40506b 100%);
+  background: linear-gradient(135deg, #182846 0%, #314b86 100%);
 }
 
 .event-gradient-pink {
-  background: linear-gradient(135deg, #6e483a 0%, #b3733f 100%);
+  background: linear-gradient(135deg, #385086 0%, #3e63dd 100%);
 }
 
 .event-gradient-cyan {
-  background: linear-gradient(135deg, #22494f 0%, #2f6668 100%);
+  background: linear-gradient(135deg, #0d5f57 0%, #0f8b6d 100%);
 }
 
 .event-gradient-orange {
-  background: linear-gradient(135deg, #6f4d2b 0%, #b3733f 100%);
+  background: linear-gradient(135deg, #8b5c13 0%, #d97706 100%);
 }
 
 .event-gradient-green {
-  background: linear-gradient(135deg, #244745 0%, #3a6a60 100%);
+  background: linear-gradient(135deg, #0d5f57 0%, #0f8b6d 100%);
+}
+
+.panel {
+  border: 1px solid rgba(24, 32, 51, 0.08);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 18px 42px rgba(24, 32, 51, 0.06);
+}
+
+.focus-ring {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(62, 99, 221, 0.12);
 }

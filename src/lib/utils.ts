@@ -36,7 +36,7 @@ export function getTicketSaleWindow(startsAt: Date | string, endsAt?: Date | str
   const eventEnd = endsAt ? new Date(endsAt) : new Date(eventStart);
   const ninetyDaysMs = 1000 * 60 * 60 * 24 * 90;
 
-  // Keep seeded/demo events bookable well ahead of time so the viva flow is reliable.
+  // Keep sample events bookable well ahead of time for development and QA coverage.
   const saleStartsAt = new Date(eventStart.getTime() - ninetyDaysMs);
   const saleEndsAt = new Date(eventEnd);
 

@@ -19,8 +19,8 @@ export default async function LoginPage() {
         <div className="opacity-0 animate-slide-in-left">
           <AuthPanel
             eyebrow="Authentication"
-            title="Secure access for attendees, staff, and administrators."
-            description="Login is designed to feel calm and direct while still supporting role-aware access, verification, reset flows, and a demo-safe environment."
+            title="Sign in for bookings, tickets, and platform operations."
+            description="A clean login flow for attendees, staff, organizers, and administrators."
           />
         </div>
         <div className="opacity-0 animate-slide-in-right delay-200">

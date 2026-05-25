@@ -18,7 +18,6 @@ export default async function AdminPromoCodesPage() {
       title="Promo code management"
       description="Create and review discount rules with the same cleaner operational presentation as the rest of admin."
       navItems={adminNavItems}
-      currentPath="/admin/promo-codes"
     >
       <div className="space-y-5">
         <div className="grid gap-5 md:grid-cols-2">

@@ -12,7 +12,6 @@ export default async function NotificationsPage() {
       title="Notification inbox"
       description="Review booking confirmations, reminders, verification updates, and venue-entry messages from one place."
       navItems={userNavItems}
-      currentPath="/notifications"
     >
       <NotificationsCenter />
     </AppShell>

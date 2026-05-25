@@ -4,7 +4,8 @@ import { EventCard } from "@/components/events/event-card";
 import { EventEmptyState } from "@/components/events/event-empty-state";
 import { EventFilters } from "@/components/events/event-filters";
 import { SiteHeader } from "@/components/layout/site-header";
-import { Badge } from "@/components/ui/badge";
+import { SectionHeader } from "@/components/ui/section-header";
+import { StatCard } from "@/components/ui/stat-card";
 import { getEventFilterOptions, getPublicEvents } from "@/server/events/service";
 
 export default async function EventsPage({
@@ -29,29 +30,26 @@ export default async function EventsPage({
   return (
     <div className="pb-16">
       <SiteHeader />
-      <main className="container-shell space-y-10 py-14">
-        <div className="grid gap-5 opacity-0 animate-fade-in lg:grid-cols-[1fr_auto] lg:items-end">
-          <div className="space-y-4">
-            <Badge className="bg-white/80 text-primary">
-              <Compass className="mr-2 h-3 w-3" />
-              Browse catalogue
-            </Badge>
-            <h1 className="max-w-4xl text-5xl leading-[0.95] md:text-6xl">
-              Discover professionally presented events across Nepal.
-            </h1>
-            <p className="max-w-3xl text-base leading-8 text-muted-foreground">
-              Browse by city, category, or featured status and move from discovery into
-              booking with a cleaner, more focused event selection flow.
-            </p>
-          </div>
-          <div className="rounded-[28px] border border-border bg-white/72 px-6 py-4 shadow-[0_16px_40px_rgba(24,34,53,0.07)]">
-            <p className="text-[0.72rem] uppercase tracking-[0.22em] text-muted-foreground">
-              Available events
-            </p>
-            <p className="mt-2 text-3xl font-semibold leading-none text-foreground">
-              {events.length}
-            </p>
-          </div>
+      <main className="container-shell space-y-8 py-10 md:py-14">
+        <div className="grid gap-5 opacity-0 animate-fade-in lg:grid-cols-[1fr_220px] lg:items-end">
+          <SectionHeader
+            badge={
+              <>
+                <Compass className="mr-2 h-3 w-3" />
+                Event Catalogue
+              </>
+            }
+            title="Discover curated events across Nepal"
+            description="Compare dates, cities, ticket options, and featured listings without digging through long descriptions."
+            className="min-w-0"
+          />
+          <StatCard
+            label="Available events"
+            value={String(events.length)}
+            note="Live matches for your current filters"
+            icon={Compass}
+            tone="indigo"
+          />
         </div>
 
         <div className="opacity-0 animate-fade-in delay-100">

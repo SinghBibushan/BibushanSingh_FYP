@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SectionHeader } from "@/components/ui/section-header";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { readJson } from "@/lib/api";
 import { DISCOUNT_RULES } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
@@ -124,18 +126,13 @@ export function CheckoutBuilder({
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-      <Card className="bg-white/78">
+      <Card className="bg-white/90">
         <CardContent className="space-y-6">
-          <div className="space-y-3">
-            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-secondary">
-              Ticket selection
-            </p>
-            <h2 className="text-3xl leading-none">Configure your order</h2>
-            <p className="text-sm leading-7 text-muted-foreground">
-              Select quantities, apply promo or student pricing where eligible, and
-              request a verified server-side quote before creating the booking.
-            </p>
-          </div>
+          <SectionHeader
+            badge="Ticket Selection"
+            title="Configure your order"
+            description="Choose quantities, optional discounts, and a payment method before requesting the final quote."
+          />
 
           <div className="space-y-4">
             {event.ticketTypes.map((ticket) => {
@@ -145,7 +142,7 @@ export function CheckoutBuilder({
               return (
                 <div
                   key={ticket.id}
-                  className="grid gap-4 rounded-[24px] border border-border bg-white/82 p-4 md:grid-cols-[1fr_170px]"
+                  className="grid gap-4 rounded-[24px] border border-border bg-white/88 p-4 md:grid-cols-[1fr_170px]"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between gap-3">
@@ -158,12 +155,20 @@ export function CheckoutBuilder({
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <span className="rounded-full border border-border bg-white px-3 py-1 text-xs font-semibold text-muted-foreground">
+                      <StatusBadge
+                        tone={
+                          ticket.quantityRemaining === 0
+                            ? "danger"
+                            : ticket.quantityRemaining <= 10
+                              ? "warning"
+                              : "success"
+                        }
+                      >
                         {ticket.quantityRemaining} seats remaining
-                      </span>
-                      <span className="rounded-full border border-border bg-white px-3 py-1 text-xs font-semibold text-muted-foreground">
+                      </StatusBadge>
+                      <StatusBadge tone="neutral">
                         Limit {ticket.perUserLimit} per booking
-                      </span>
+                      </StatusBadge>
                       {ticket.benefits.slice(0, 2).map((benefit) => (
                         <span
                           key={benefit}
@@ -176,11 +181,12 @@ export function CheckoutBuilder({
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor={`qty-${ticket.id}`}>Quantity</Label>
-                    <div className="flex items-center gap-2 rounded-2xl border border-border bg-white p-2">
+                    <div className="flex items-center gap-2 rounded-2xl border border-border bg-slate-50 p-2">
                       <button
                         type="button"
                         onClick={() => setQuantity(ticket.id, quantity - 1, maxQuantity)}
-                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-white text-foreground"
+                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-white text-foreground focus-ring"
+                        aria-label={`Decrease ${ticket.name} quantity`}
                       >
                         <Minus className="h-4 w-4" />
                       </button>
@@ -198,7 +204,8 @@ export function CheckoutBuilder({
                       <button
                         type="button"
                         onClick={() => setQuantity(ticket.id, quantity + 1, maxQuantity)}
-                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-white text-foreground"
+                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-white text-foreground focus-ring"
+                        aria-label={`Increase ${ticket.name} quantity`}
                       >
                         <Plus className="h-4 w-4" />
                       </button>
@@ -241,19 +248,15 @@ export function CheckoutBuilder({
             </div>
           </div>
 
-          <div className="rounded-[24px] border border-border bg-[linear-gradient(145deg,#f5f4f0_0%,#ece9e2_100%)] p-4 text-sm leading-7 text-muted-foreground">
-            Loyalty math: points earned are calculated from the final paid amount after
-            discounts. This booking uses the rule{" "}
-            <span className="font-semibold text-foreground">
-              floor(final paid amount x {DISCOUNT_RULES.pointsPerCurrencyUnit})
-            </span>,
-            which means you earn about 1 point for every NPR 10 spent.
+          <div className="rounded-[24px] border border-border bg-[linear-gradient(145deg,#f8fbff_0%,#eef4ff_100%)] p-4 text-sm leading-7 text-muted-foreground">
+            Loyalty points are calculated from the final paid amount after discounts. In
+            this demo, you earn about 1 point for every NPR 10 spent.
           </div>
 
           <label
             className={`flex items-start gap-3 rounded-[24px] border p-4 text-sm ${
               studentVerified
-                ? "border-border bg-[linear-gradient(145deg,#eef5f3_0%,#e7efec_100%)]"
+                ? "border-border bg-[linear-gradient(145deg,#eefbf6_0%,#e6f7ef_100%)]"
                 : "border-border bg-white/82"
             }`}
           >
@@ -298,7 +301,7 @@ export function CheckoutBuilder({
                     </p>
                     <p className="mt-1 text-sm leading-6 text-muted-foreground">
                       {provider === "MOCK"
-                        ? "Best for viva/demo. Payment succeeds instantly inside the app."
+                        ? "Useful for local testing. Payment completes instantly inside the app."
                         : "Use PayPal sandbox or live checkout depending on environment."}
                     </p>
                   </button>
@@ -309,22 +312,19 @@ export function CheckoutBuilder({
         </CardContent>
       </Card>
 
-      <Card className="h-fit bg-white/78 lg:sticky lg:top-28">
+      <Card className="h-fit bg-white/92 lg:sticky lg:top-28">
         <CardContent className="space-y-6">
-          <div className="space-y-3">
-            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-secondary">
-              Order summary
-            </p>
-            <h2 className="text-3xl leading-none">Review before booking</h2>
-            <p className="text-sm leading-7 text-muted-foreground">
-              Quote first to inspect the final price breakdown, then create a booking and
-              {paymentProvider === "PAYPAL"
-                ? " complete the PayPal payment on the next screen."
+          <SectionHeader
+            badge="Order Summary"
+            title="Review before booking"
+            description={`Quote first to inspect the final price breakdown, then create the booking and${
+              paymentProvider === "PAYPAL"
+                ? " continue to PayPal."
                 : paymentProvider === "MOCK"
-                  ? " complete mock payment on the next screen."
-                  : " finish payment after a provider is configured."}
-            </p>
-          </div>
+                  ? " complete mock payment."
+                  : " choose a payment method."
+            }`}
+          />
 
           <div className="rounded-[24px] border border-border bg-white/82 p-4">
             <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
@@ -336,7 +336,7 @@ export function CheckoutBuilder({
           </div>
 
           {quote ? (
-            <div className="space-y-4 rounded-[24px] border border-border bg-[linear-gradient(145deg,#f8f3ea_0%,#f2e5d6_100%)] p-5">
+            <div className="space-y-4 rounded-[24px] border border-border bg-[linear-gradient(145deg,#f8fbff_0%,#eef4ff_100%)] p-5">
               <div className="space-y-2">
                 {quote.selections.map((selection) => (
                   <div
@@ -380,14 +380,14 @@ export function CheckoutBuilder({
             </div>
           ) : (
             <div className="rounded-[24px] border border-dashed border-border p-5 text-sm leading-7 text-muted-foreground">
-              No quote yet. Use the selections on the left, then click
-              <span className="font-semibold text-foreground"> Update total</span>.
+              No quote yet. Choose ticket quantities and click
+              <span className="font-semibold text-foreground"> Update Total</span>.
             </div>
           )}
 
           <div className="grid gap-3">
             <Button onClick={handleQuote} disabled={isQuoting}>
-              {isQuoting ? "Updating..." : "Update total"}
+              {isQuoting ? "Updating..." : "Update Total"}
             </Button>
             <Button
               variant="secondary"

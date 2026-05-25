@@ -14,7 +14,6 @@ export default async function ProfilePage() {
       title="Account profile"
       description="Identity, verification, and loyalty state presented in a cleaner account-management layout."
       navItems={userNavItems}
-      currentPath="/profile"
     >
       <div className="grid gap-5 lg:grid-cols-[1fr_0.7fr]">
         <Card className="bg-white/78">

@@ -56,8 +56,8 @@ export default async function BookingDetailsPage({
             <Badge>Booking details</Badge>
             <h1 className="text-5xl leading-none">{booking.bookingCode}</h1>
             <p className="max-w-3xl text-base leading-8 text-muted-foreground">
-              This page separates booking creation from payment confirmation so the
-              viva can clearly demonstrate pending and confirmed states.
+              This page separates booking creation from payment confirmation so pending
+              and confirmed states remain clear to the customer.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
@@ -174,7 +174,7 @@ export default async function BookingDetailsPage({
               <p className="text-sm leading-7 text-muted-foreground">
                 {payment.provider === "PAYPAL"
                   ? `Complete checkout with PayPal to confirm this booking${payment.meta?.payableAmount && payment.meta?.payableCurrency ? ` for ${payment.meta.payableCurrency} ${payment.meta.payableAmount}` : ""}.`
-                  : "Use the buttons below to simulate a successful or failed payment. On success, booking status becomes confirmed and loyalty points are updated."}
+                  : "Use the buttons below to simulate a successful or failed payment. A successful confirmation updates booking status and loyalty rewards."}
               </p>
               {payment.provider === "PAYPAL" ? (
                 <PayPalPaymentPanel

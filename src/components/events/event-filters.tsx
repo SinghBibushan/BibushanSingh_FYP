@@ -1,13 +1,14 @@
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { Filter, Search, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 const selectClassName =
-  "flex h-12 w-full rounded-2xl border border-border bg-white/70 px-4 text-sm text-foreground outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] focus-visible:ring-2 focus-visible:ring-ring";
+  "flex h-12 w-full rounded-2xl border border-border bg-white px-4 text-sm text-foreground outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] focus-visible:border-secondary focus-visible:ring-2 focus-visible:ring-ring";
 
 export function EventFilters({
   categories,
@@ -23,22 +24,48 @@ export function EventFilters({
     featured: string;
   };
 }) {
+  const activeFilters = [
+    values.q ? `Search: ${values.q}` : null,
+    values.category !== "all" ? values.category : null,
+    values.city !== "all" ? values.city : null,
+    values.featured === "true" ? "Featured only" : null,
+  ].filter(Boolean);
+
   return (
-    <Card className="bg-white/76">
+    <Card className="bg-white/88">
       <CardContent className="space-y-5">
-        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-secondary">
-              Browse filters
-            </p>
-            <h2 className="mt-2 text-2xl leading-none">Refine the catalogue quickly</h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusBadge tone="info">
+                <Filter className="mr-1 h-3 w-3" />
+                Filter events
+              </StatusBadge>
+              {values.featured === "true" ? (
+                <StatusBadge tone="warning">
+                  <Sparkles className="mr-1 h-3 w-3" />
+                  Featured
+                </StatusBadge>
+              ) : null}
+            </div>
+            <h2 className="mt-3 text-2xl leading-none">Find the right event faster</h2>
           </div>
-          <Link href="/events" className="text-sm font-semibold text-primary">
-            Clear all filters
-          </Link>
+          <Button asChild variant="outline" size="sm" className="w-full sm:w-auto">
+            <Link href="/events">Clear Filters</Link>
+          </Button>
         </div>
 
-        <form className="grid gap-4 lg:grid-cols-[1.4fr_0.9fr_0.9fr_0.7fr_auto]">
+        {activeFilters.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {activeFilters.map((filter) => (
+              <StatusBadge key={filter} tone="neutral">
+                {filter}
+              </StatusBadge>
+            ))}
+          </div>
+        ) : null}
+
+        <form className="grid gap-4 md:grid-cols-2 xl:grid-cols-[1.4fr_0.9fr_0.9fr_0.8fr_auto]">
           <div className="space-y-2">
             <Label htmlFor="q">Search events</Label>
             <div className="relative">
@@ -90,9 +117,9 @@ export function EventFilters({
             </select>
           </div>
 
-          <div className="flex items-end gap-3">
-            <Button type="submit" className="w-full lg:w-auto">
-              Apply
+          <div className="flex items-end gap-3 md:col-span-2 xl:col-span-1">
+            <Button type="submit" className="w-full xl:w-auto">
+              Apply Filters
             </Button>
           </div>
         </form>

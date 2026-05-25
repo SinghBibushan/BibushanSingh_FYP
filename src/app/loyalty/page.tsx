@@ -17,7 +17,6 @@ export default async function LoyaltyPage() {
       title="Rewards dashboard"
       description="A cleaner view of points, spend, and recent reward activity from confirmed bookings."
       navItems={userNavItems}
-      currentPath="/loyalty"
     >
       <div className="space-y-5">
         <Card className="bg-white/78">

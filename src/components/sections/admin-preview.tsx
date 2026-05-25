@@ -17,7 +17,7 @@ export function AdminPreviewSection() {
               </h2>
               <p className="max-w-xl text-sm leading-7 text-white/72">
                 The admin side will expose CRUD flows, summary cards, sales tables,
-                student review queues, and demo-friendly metrics seeded for viva.
+                student review queues, and operational metrics for day-to-day management.
               </p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">

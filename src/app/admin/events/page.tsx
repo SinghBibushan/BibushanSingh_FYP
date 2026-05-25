@@ -4,12 +4,15 @@ import { CreateEventForm } from "@/components/admin/create-event-form";
 import { DeleteEventButton } from "@/components/admin/delete-event-button";
 import { ReviewEventButtons } from "@/components/admin/review-event-buttons";
 import { AppShell } from "@/components/layout/app-shell";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { SectionHeader } from "@/components/ui/section-header";
+import { StatCard } from "@/components/ui/stat-card";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { adminNavItems } from "@/lib/admin-nav";
 import { requireAdmin } from "@/lib/auth";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { listAdminEvents } from "@/server/admin/service";
+import { CalendarClock, Sparkles, TimerReset } from "lucide-react";
 
 export default async function AdminEventsPage() {
   await requireAdmin();
@@ -23,41 +26,23 @@ export default async function AdminEventsPage() {
       title="Manage events"
       description="Create, review, and remove public listings from a cleaner operational view."
       navItems={adminNavItems}
-      currentPath="/admin/events"
     >
       <div className="space-y-5">
         <div className="grid gap-5 md:grid-cols-3">
-          <Card className="bg-white/78">
-            <CardContent className="space-y-3">
-              <p className="text-[0.72rem] uppercase tracking-[0.22em] text-muted-foreground">
-                Total events
-              </p>
-              <p className="text-4xl font-semibold leading-none text-foreground">{events.length}</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/78">
-            <CardContent className="space-y-3">
-              <p className="text-[0.72rem] uppercase tracking-[0.22em] text-muted-foreground">
-                Featured listings
-              </p>
-              <p className="text-4xl font-semibold leading-none text-foreground">{featuredCount}</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/78">
-            <CardContent className="space-y-3">
-              <p className="text-[0.72rem] uppercase tracking-[0.22em] text-muted-foreground">
-                Pending approval
-              </p>
-              <p className="text-4xl font-semibold leading-none text-foreground">{pendingCount}</p>
-            </CardContent>
-          </Card>
+          <StatCard label="Total events" value={String(events.length)} icon={CalendarClock} tone="slate" />
+          <StatCard label="Featured listings" value={String(featuredCount)} icon={Sparkles} tone="indigo" />
+          <StatCard label="Pending approval" value={String(pendingCount)} icon={TimerReset} tone="amber" />
         </div>
 
         <CreateEventForm />
 
-        <Card className="bg-white/78">
+        <Card className="bg-white/90">
           <CardContent className="space-y-4">
-            <h2 className="text-3xl leading-none">Current events</h2>
+            <SectionHeader
+              badge="Current Events"
+              title="Event inventory"
+              description="Review the publishing state, pricing, ticket setup, and organizer ownership for each listing."
+            />
             <div className="space-y-3">
               {events.map((event) => (
                 <div
@@ -67,8 +52,20 @@ export default async function AdminEventsPage() {
                   <div>
                     <div className="flex flex-wrap items-center gap-3">
                       <p className="font-semibold text-foreground">{event.title}</p>
-                      <Badge>{event.status}</Badge>
-                      {event.featured ? <Badge>Featured</Badge> : null}
+                      <StatusBadge
+                        tone={
+                          event.status === "PUBLISHED"
+                            ? "success"
+                            : event.status === "PENDING_APPROVAL"
+                              ? "warning"
+                              : event.status === "REJECTED"
+                                ? "danger"
+                                : "neutral"
+                        }
+                      >
+                        {event.status}
+                      </StatusBadge>
+                      {event.featured ? <StatusBadge tone="info">Featured</StatusBadge> : null}
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {event.category} in {event.city}

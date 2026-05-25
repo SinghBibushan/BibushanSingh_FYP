@@ -1,9 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Ticket as TicketIcon } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { SectionHeader } from "@/components/ui/section-header";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { requireUser } from "@/lib/auth";
 import { userNavItems } from "@/lib/user-nav";
 import { formatDate } from "@/lib/utils";
@@ -19,47 +22,34 @@ export default async function TicketsPage() {
       title="Ticket vault"
       description="Confirmed bookings generate QR-backed tickets and downloadable PDFs in a more polished delivery screen."
       navItems={userNavItems}
-      currentPath="/tickets"
     >
       {tickets.length === 0 ? (
-        <Card className="bg-white/78">
-          <CardContent className="space-y-4 p-10 text-center">
-            <h2 className="text-3xl leading-none">No tickets yet</h2>
-            <p className="text-sm leading-7 text-muted-foreground">
-              Complete a booking and payment to populate this vault with issued tickets.
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={TicketIcon}
+          title="No tickets yet"
+          description="Complete a booking and payment to populate this vault with issued tickets."
+        />
       ) : (
         <div className="space-y-5">
-          <div className="rounded-[28px] border border-border bg-white/72 px-6 py-4">
-            <p className="text-[0.72rem] uppercase tracking-[0.22em] text-muted-foreground">
-              Issued tickets
-            </p>
-            <p className="mt-2 text-3xl font-semibold leading-none text-foreground">
-              {tickets.length}
-            </p>
-          </div>
+          <SectionHeader
+            badge="Issued Tickets"
+            title={`${tickets.length} active ticket${tickets.length === 1 ? "" : "s"}`}
+            description="QR-backed tickets are grouped here for quick access during event entry."
+          />
 
           <div className="grid gap-5 lg:grid-cols-2">
             {tickets.map((ticket) => (
-              <Card key={ticket.ticketCode} className="overflow-hidden bg-white/78 hover-lift">
+              <Card key={ticket.ticketCode} className="overflow-hidden bg-white/90 hover-lift">
                 <CardContent>
                   <div className="grid gap-6 lg:grid-cols-[1fr_auto]">
                     <div className="space-y-5">
                       <div className="flex flex-wrap items-center gap-3">
-                        <Badge className="bg-primary text-primary-foreground">
+                        <StatusBadge tone="info">
                           {ticket.ticketTypeName}
-                        </Badge>
-                        <Badge
-                          className={
-                            ticket.status === "ACTIVE"
-                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                              : ""
-                          }
-                        >
+                        </StatusBadge>
+                        <StatusBadge tone={ticket.status === "ACTIVE" ? "success" : "warning"}>
                           {ticket.status}
-                        </Badge>
+                        </StatusBadge>
                       </div>
 
                       <div className="space-y-2">

@@ -82,11 +82,11 @@ export function NotificationBell() {
       {showDropdown ? (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
-          <div className="absolute right-0 z-50 mt-2 max-h-96 w-84 overflow-y-auto rounded-[26px] border border-border bg-card shadow-[0_24px_60px_rgba(24,34,53,0.14)]">
+          <div className="fixed inset-x-4 top-22 z-50 max-h-[min(70vh,32rem)] overflow-y-auto rounded-[26px] border border-border bg-card shadow-[0_24px_60px_rgba(24,34,53,0.14)] md:absolute md:right-0 md:left-auto md:top-auto md:mt-2 md:max-h-96 md:w-[21rem]">
             <div className="border-b border-border p-4">
               <div className="flex items-center justify-between gap-3">
                 <h3 className="font-semibold text-foreground">Notifications</h3>
-                <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                <span className="shrink-0 text-xs uppercase tracking-[0.18em] text-muted-foreground">
                   {unreadCount} unread
                 </span>
               </div>
